@@ -1,0 +1,152 @@
+$ docker --version
+Docker version 29.9.1, build dfc520dcc2
+$ docker ps
+permission denied while trying to connect to the docker API at unix:///var/run/docker.sock
+$ id -nG
+learner wheel
+$ sudo docker --version
+Docker version 29.9.1, build dfc520dcc2
+$ sudo docker info
+Client:
+ Version:    29.9.1
+ Context:    default
+ Debug Mode: false
+ Plugins:
+  buildx: Docker Buildx (Docker Inc.)
+    Version:  0.38.0
+    Path:     /usr/lib/docker/cli-plugins/docker-buildx
+  compose: Docker Compose (Docker Inc.)
+    Version:  5.6.0
+    Path:     /usr/lib/docker/cli-plugins/docker-compose
+
+Server:
+ Containers: 5
+  Running: 5
+  Paused: 0
+  Stopped: 0
+ Images: 6
+ Server Version: 29.9.1
+ Storage Driver: overlayfs
+  driver-type: io.containerd.snapshotter.v1
+ Logging Driver: json-file
+ Cgroup Driver: systemd
+ Cgroup Version: 2
+ Plugins:
+  Volume: local
+  Network: bridge host ipvlan macvlan null overlay
+  Log: awslogs fluentd gcplogs gelf journald json-file local splunk syslog
+ CDI spec directories:
+  /etc/cdi
+  /var/run/cdi
+ Swarm: inactive
+ Runtimes: io.containerd.runc.v2 runc
+ Default Runtime: runc
+ Init Binary: docker-init
+ containerd version: b7a25261e029d68978bbf290df0a62fc819b3c51.m
+ runc version: 
+ init version: de40ad0
+ Security Options:
+  seccomp
+   Profile: builtin
+  cgroupns
+ Kernel Version: 7.2.8-9-omarchy
+ Operating System: Omarchy
+ OSType: linux
+ Architecture: x86_64
+ CPUs: 16
+ Total Memory: 62.59GiB
+ Name: <호스트명 마스킹>
+ ID: <데몬 ID 마스킹>
+ Docker Root Dir: /var/lib/docker
+ Debug Mode: false
+ Experimental: false
+ Insecure Registries:
+  127.0.0.0/8
+  ::1/128
+ Live Restore Enabled: false
+ Firewall Backend: iptables
+  EnableUserlandProxy: true
+  UserlandProxyPath: /usr/bin/docker-proxy
+
+$ sudo docker run hello-world
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+4f55086f7dd0: Pulling fs layer
+4f55086f7dd0: Download complete
+4f55086f7dd0: Pull complete
+d5e71e642bf5: Download complete
+Digest: sha256:11a3eb1597e864c51b3f56733cb2e8a90bf0c284bfc05f9444d81c558bc848aa
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+
+$ sudo docker pull ubuntu:22.04
+22.04: Pulling from library/ubuntu
+cf1a5487baaf: Pulling fs layer
+cf1a5487baaf: Download complete
+637115e4c229: Download complete
+cf1a5487baaf: Pull complete
+Digest: sha256:0a9887931b0e38af2e3487ed39e29436b0535c4f3f52e57745baaf79d1898956
+Status: Downloaded newer image for ubuntu:22.04
+docker.io/library/ubuntu:22.04
+$ sudo docker pull nginx:alpine
+alpine: Pulling from library/nginx
+1fdd0614a47e: Pulling fs layer
+70683d58fa5c: Pulling fs layer
+6711e0c4f5a7: Pulling fs layer
+e2de96513ba9: Pulling fs layer
+b44956913298: Pulling fs layer
+3bf3671a4e6a: Pulling fs layer
+710ec83ca6cd: Pulling fs layer
+6638b436592c: Pulling fs layer
+70683d58fa5c: Download complete
+b44956913298: Download complete
+1fdd0614a47e: Download complete
+6711e0c4f5a7: Download complete
+3bf3671a4e6a: Download complete
+e2de96513ba9: Download complete
+6638b436592c: Download complete
+710ec83ca6cd: Download complete
+e2de96513ba9: Pull complete
+6711e0c4f5a7: Pull complete
+3bf3671a4e6a: Pull complete
+440345b60747: Download complete
+70683d58fa5c: Pull complete
+b44956913298: Pull complete
+6638b436592c: Pull complete
+710ec83ca6cd: Pull complete
+688ea647499e: Download complete
+1fdd0614a47e: Pull complete
+Digest: sha256:892bb2152464f0c5d8972593a5f5afaf8054552580b699d95f8ff4af08c2d33d
+Status: Downloaded newer image for nginx:alpine
+docker.io/library/nginx:alpine
+$ sudo docker images
+IMAGE                                                                                                   ID             DISK USAGE   CONTENT SIZE   EXTRA
+diegosouzapw/omniroute@sha256:77b38c546e1c74add83d73cd2c752342c364c0565fb0cc21eb4792e9c0a5cb79          77b38c546e1c       2.03GB          468MB   U    
+dockurr/windows:latest                                                                                  16fd7c39a3e4        967MB          239MB   U    
+ghcr.io/volcengine/openviking@sha256:2c104187d17d9b5c837d578990ae574807ad8ab78ba84191ddafabfde207af38   2c104187d17d       1.71GB          305MB   U    
+hello-world:latest                                                                                      11a3eb1597e8       21.8kB         9.49kB   U    
+nginx:alpine                                                                                            892bb2152464        104MB         29.7MB        
+redis:8.6.5-alpine                                                                                      cd218f4b106a        136MB           35MB   U    
+rollback/searxng:pre-20261019                                                                           8bdd9aa136b2        383MB         98.4MB        
+searxng/searxng:latest                                                                                  b9383ac59bc9        383MB         98.4MB   U    
+ubuntu:22.04                                                                                            0a9887931b0e        118MB         31.7MB        

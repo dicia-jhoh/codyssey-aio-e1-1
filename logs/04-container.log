@@ -1,0 +1,66 @@
+$ sudo docker run --rm ubuntu:22.04 echo "한 번 실행하고 끝나는 컨테이너"
+한 번 실행하고 끝나는 컨테이너
+$ sudo docker run -d --name e11-ubuntu ubuntu:22.04 sleep infinity
+86eb553fd91cf3117bdc30e4371d324798368218fdc7714cba0765f6a74b9887
+$ sudo docker exec e11-ubuntu ls /
+bin
+boot
+dev
+etc
+home
+lib
+lib32
+lib64
+libx32
+media
+mnt
+opt
+proc
+root
+run
+sbin
+srv
+sys
+tmp
+usr
+var
+$ sudo docker exec e11-ubuntu bash -c "echo 컨테이너 안에서 실행 && cat /etc/os-release | head -2 && whoami"
+컨테이너 안에서 실행
+PRETTY_NAME="Ubuntu 22.04.5 LTS"
+NAME="Ubuntu"
+root
+$ sudo docker run -d --name e11-ticker ubuntu:22.04 bash -c 'i=1; while true; do echo "tick $i"; i=$((i+1)); sleep 1; done'
+5a8b1357802596ffb7c9fae43b185dfbf0d276dd9d0d1c4912ca2299b61cbcce
+$ sudo timeout -s KILL 3 docker attach --no-stdin --sig-proxy=false e11-ticker; echo "attach 종료 코드: $? (3초 뒤 attach 클라이언트만 강제 종료)"
+tick 32
+tick 33
+tick 34
+/bin/bash: line 2: 765191 Killed                     sudo timeout -s KILL 3 docker attach --no-stdin --sig-proxy=false e11-ticker
+attach 종료 코드: 137 (3초 뒤 attach 클라이언트만 강제 종료)
+$ sudo docker ps --filter name=e11-ticker --format "{{.Names}} {{.Status}}"
+e11-ticker Up 33 seconds
+$ sudo docker exec e11-ticker ps -ef
+UID          PID    PPID  C STIME TTY          TIME CMD
+root           1       0  0 08:19 ?        00:00:00 bash -c i=1; while true; do echo "tick $i"; i=$((i+1)); sleep 1; done
+root          40       1  0 08:20 ?        00:00:00 sleep 1
+root          41       0  0 08:20 ?        00:00:00 ps -ef
+$ sudo docker logs --tail 3 e11-ticker
+tick 32
+tick 33
+tick 34
+$ sudo docker stats --no-stream e11-ubuntu e11-ticker
+CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O         BLOCK I/O   PIDS
+86eb553fd91c   e11-ubuntu   0.00%     488KiB / 62.59GiB     0.00%     10.3kB / 126B   0B / 0B     1
+5a8b13578025   e11-ticker   0.06%     1.262MiB / 62.59GiB   0.00%     4.31kB / 126B   0B / 0B     2
+$ sudo docker stop e11-ticker
+e11-ticker
+$ sudo docker ps -a --filter name=e11-
+CONTAINER ID   IMAGE          COMMAND                  CREATED         STATUS                                PORTS     NAMES
+5a8b13578025   ubuntu:22.04   "bash -c 'i=1; while…"   7 minutes ago   Exited (137) Less than a second ago             e11-ticker
+86eb553fd91c   ubuntu:22.04   "sleep infinity"         7 minutes ago   Up 7 minutes                                    e11-ubuntu
+$ sudo docker start e11-ticker
+e11-ticker
+$ sudo docker ps --filter name=e11-
+CONTAINER ID   IMAGE          COMMAND                  CREATED         STATUS                  PORTS     NAMES
+5a8b13578025   ubuntu:22.04   "bash -c 'i=1; while…"   7 minutes ago   Up Less than a second             e11-ticker
+86eb553fd91c   ubuntu:22.04   "sleep infinity"         7 minutes ago   Up 7 minutes                      e11-ubuntu
