@@ -12,7 +12,7 @@ AI올인원 입학연수 · 개발 입문 E1-1 (미션 185000)
 | 항목 | 값 |
 |---|---|
 | OS | Omarchy (Arch Linux 기반), Linux 커널 7.2.8 |
-| Shell / 터미널 | bash / foot |
+| Shell | bash(명령은 비대화형으로 실행해 출력을 로그 파일에 기록) |
 | Docker | 29.9.1 (Compose 5.6.0, Buildx 0.38.0) |
 | Git | 2.56.0 |
 | 하드웨어 | x86_64, CPU 16코어, RAM 62GB |
