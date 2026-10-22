@@ -247,7 +247,7 @@ curl --version | head -1
 
 | 항목 | 값 |
 |---|---|
-| OS | Omarchy (Arch Linux 기반), Linux 커널 7.2.8 |
+| OS | Arch Linux, Linux 커널 7.2.8 |
 | Shell | bash(명령은 비대화형으로 실행해 출력을 로그 파일에 기록) |
 | Docker | 29.9.1 (Compose 5.6.0, Buildx 0.38.0) |
 | Git | 2.56.0 |
