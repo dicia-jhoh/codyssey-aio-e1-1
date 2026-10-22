@@ -1,0 +1,14 @@
+$ cat bind-site/index.html
+<h1>바인드 마운트 — 수정 전</h1>
+$ sudo docker run -d --name e11-bind -p 8083:80 -v "$PWD/bind-site":/usr/share/nginx/html:ro nginx:alpine
+46d5638394b19c6a71082a2de3eec62ca90204b7bc0235a8f0963a62fd541209
+$ curl -s http://localhost:8083/
+<h1>바인드 마운트 — 수정 전</h1>
+$ echo "<h1>바인드 마운트 — 호스트에서 수정한 뒤</h1>" > bind-site/index.html
+$ curl -s http://localhost:8083/
+<h1>바인드 마운트 — 호스트에서 수정한 뒤</h1>
+$ sudo docker exec e11-bind cat /usr/share/nginx/html/index.html
+<h1>바인드 마운트 — 호스트에서 수정한 뒤</h1>
+$ sudo docker exec e11-bind sh -c "echo 컨테이너에서 쓰기 > /usr/share/nginx/html/x.txt"; echo "종료 코드: $?"
+sh: can't create /usr/share/nginx/html/x.txt: Read-only file system
+종료 코드: 1

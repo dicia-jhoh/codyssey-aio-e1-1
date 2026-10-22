@@ -1,0 +1,19 @@
+$ sudo docker volume create e11-data
+e11-data
+$ sudo docker volume ls --filter name=e11-
+DRIVER    VOLUME NAME
+local     e11-data
+$ sudo docker run -d --name e11-vol1 -v e11-data:/data ubuntu:22.04 sleep infinity
+919c43c1d54832a471e573ab9662c99b310d07331a004cc4a51c2d5ceaab05b3
+$ sudo docker exec e11-vol1 bash -c "echo 컨테이너가 사라져도 남아야 하는 기록 > /data/hello.txt && cat /data/hello.txt"
+컨테이너가 사라져도 남아야 하는 기록
+$ sudo docker rm -f e11-vol1
+e11-vol1
+$ sudo docker ps -a --filter name=e11-vol
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+$ sudo docker run -d --name e11-vol2 -v e11-data:/data ubuntu:22.04 sleep infinity
+f85bb5dffa500de2f6e75dba7317aae3f05f3292831e8944e212b4fbeb2da76c
+$ sudo docker exec e11-vol2 cat /data/hello.txt
+컨테이너가 사라져도 남아야 하는 기록
+$ sudo docker volume inspect e11-data --format "{{.Name}} {{.Driver}} {{.Mountpoint}}"
+e11-data local /var/lib/docker/volumes/e11-data/_data
