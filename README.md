@@ -21,15 +21,225 @@ AI올인원 입학연수 · 개발 입문
 
 ---
 
-## 📚 목차
-| 시작 | 요구사항(원문 번호) | 더 보기 |
+## 🧒 쉽게 말하면
+
+> 새 집으로 이사 와서 **공부방(작업실)을 꾸미는 날**이라고 생각하면 된다.
+> 책상 정리(폴더·파일 다루기), 서랍 자물쇠(권한), 어디서 열어도 똑같은 **도시락통**(Docker), 공부 일기장(Git)을 하나씩 갖춘다.
+
+이 과제에서 쓰는 말 다섯 개만 그림으로 기억하면 된다.
+
+| 말 | 비유 | 이 과제에서 |
 |---|---|---|
-| [프로젝트 개요](#-프로젝트-개요) | [1. 저장소·기술 문서](#-1-제출-저장소-및-기술-문서) · [2. 터미널](#-2-터미널-조작-로그) · [3. 권한](#-3-권한-실습) | [트러블슈팅](#-트러블슈팅) |
-| [실행 환경](#-실행-환경) | [4. Docker 점검](#-4-docker-설치-및-기본-점검) · [5. 운영 명령](#-5-docker-기본-운영-명령) · [6. 컨테이너 실습](#-6-컨테이너-실행-실습) | [보너스 Compose](#-보너스--docker-compose) |
-| [수행 체크리스트](#-수행-체크리스트) | [7. 커스텀 이미지](#-7-기존-dockerfile-기반-커스텀-이미지) · [8. 포트 매핑](#-8-포트-매핑-및-접속-증거) · [9. 마운트·볼륨](#-9-바인드-마운트와-docker-볼륨) | [설명](#-설명) · [용어 사전](#-용어-사전) |
-| [준비물](#-준비물) · [따라 하기](#-따라-하기) | [10. Git](#-10-git-설정-및-github-연동) · [11. 보안](#-11-보안-및-개인정보-보호) | [정리](#-정리) · [과정 연결](#-과정-연결) |
+| 🍱 **이미지** | 도시락 **만드는 법(레시피)** | `nginx:alpine`(웹 서버 레시피)에 우리 페이지를 얹어 `e11-web:1.0` 레시피를 새로 만들었다 |
+| 📦 **컨테이너** | 레시피대로 실제로 싼 **도시락 한 통** | 같은 레시피로 도시락 두 통(`e11-web-8081`, `e11-web-8082`)을 쌌다 |
+| 🚪 **포트** | 건물의 **현관 번호** | 내 컴퓨터 8081번 문으로 들어오면 도시락 안 80번 문으로 이어 준다(`-p 8081:80`) |
+| 🪟 **바인드 마운트** | 도시락 뚜껑에 낸 **창문** | 내 컴퓨터 폴더를 고치면 도시락 안에서도 바로 바뀐다 |
+| 💾 **볼륨** | 도시락 밖에 둔 **보관함** | 도시락(컨테이너)을 버려도 보관함 안 메모는 남는다 |
+
+> [!TIP]
+> **처음이면 [준비물](#-준비물) → [따라 하기](#-따라-하기) 두 절만 보면 된다.** 그 아래 1~11절은 과제 채점용 기록(이 컴퓨터에서 실제로 친 명령과 출력 원본)이다.
+
+## 📚 목차
+- 처음 하는 사람: [쉽게 말하면](#-쉽게-말하면) · [준비물](#-준비물) · [따라 하기](#-따라-하기) · [용어 사전](#-용어-사전)
+- 과제 기록: [개요](#-프로젝트-개요) · [실행 환경](#-실행-환경) · [체크리스트](#-수행-체크리스트) · [1. 저장소](#-1-제출-저장소-및-기술-문서) · [2. 터미널](#-2-터미널-조작-로그) · [3. 권한](#-3-권한-실습) · [4. Docker 점검](#-4-docker-설치-및-기본-점검) · [5. 운영 명령](#-5-docker-기본-운영-명령) · [6. 컨테이너](#-6-컨테이너-실행-실습)
+- 과제 기록(계속): [7. 커스텀 이미지](#-7-기존-dockerfile-기반-커스텀-이미지) · [8. 포트](#-8-포트-매핑-및-접속-증거) · [9. 마운트·볼륨](#-9-바인드-마운트와-docker-볼륨) · [10. Git](#-10-git-설정-및-github-연동) · [11. 보안](#-11-보안-및-개인정보-보호) · [트러블슈팅](#-트러블슈팅) · [보너스](#-보너스--docker-compose) · [정리](#-정리) · [설명](#-설명)
+
+## 🧰 준비물
+아무것도 몰라도 된다. 내 컴퓨터 종류에 맞는 줄만 보고 준비한다.
+
+| 내 컴퓨터 | 터미널(글자로 명령을 치는 창) | Docker 설치 |
+|---|---|---|
+| 🪟 Windows | PowerShell 을 **관리자로** 열고 `wsl --install` → 재부팅 → 시작 메뉴의 **Ubuntu** 앱. 이 문서의 명령은 전부 **Ubuntu 창**에서 친다 | [Docker Desktop](https://www.docker.com/products/docker-desktop/) 설치 후 실행. 설정 → Resources → **WSL Integration** 에서 Ubuntu 를 켠다 |
+| 🍎 macOS | `⌘ + Space` → `터미널` | [Docker Desktop](https://www.docker.com/products/docker-desktop/) 설치 후 실행(메뉴 막대에 고래 아이콘) |
+| 🐧 Linux | `Ctrl + Alt + T` | 배포판 안내대로 Docker Engine 과 Compose 플러그인 설치([공식 문서](https://docs.docker.com/engine/install/)) |
+
+설치가 됐는지 터미널에서 확인한다. 네 줄 모두 버전 숫자가 나오면 준비 끝이다.
+
+```bash
+# 설치 확인 — 버전이 한 줄씩 나오면 OK (숫자는 달라도 된다)
+docker --version
+docker compose version
+git --version
+curl --version | head -1
+```
+
+- 🌐 웹 브라우저(크롬·엣지·사파리 아무거나).
+- 🚪 비어 있는 포트 8081~8085. 다른 프로그램이 쓰고 있으면 [트러블슈팅 2](#2-8080-포트--port-is-already-allocated)처럼 다른 번호를 쓰면 된다.
+- 📂 이 저장소 파일. GitHub 저장소 페이지의 초록색 **[Code]** → **[Download ZIP]** 으로 받아 압축을 푼다(Git 을 알면 `git clone <저장소 주소>`).
+  지금은 GitHub 에 올리기 전 초안이라, 올린 뒤 이 자리에 주소가 들어간다.
+- 전제 지식: **없음.** 아래 명령을 위에서부터 그대로 복사해 붙여 넣으면 된다.
+
+> [!NOTE]
+> Linux 에서 `docker` 명령이 `permission denied` 를 내면 명령 앞에 `sudo ` 를 붙인다(예: `sudo docker ps`). 이 문서의 기록(1~11절)은 그래서 전부 `sudo docker` 로 되어 있다 — 이유는 [트러블슈팅 1](#1-docker-ps--permission-denied).
+> Windows·macOS 의 Docker Desktop 은 `sudo` 가 필요 없다.
+
+## 🚶 따라 하기
+한 시간 안팎이면 끝난다. 각 단계마다 **칠 것 → 나와야 하는 화면 → 무슨 뜻인지** 순서로 적었다. 명령은 회색 상자를 통째로 복사해 터미널에 붙여 넣고 Enter.
+
+1. **연습장 폴더를 만들고 들어간다.** (책상 서랍 하나를 비워 연습용으로 쓴다)
+   ```bash
+   # 홈 폴더로 가서 → 연습 폴더 만들고 → 그 안으로 들어가 → 지금 위치 확인
+   cd ~
+   mkdir -p workshop-practice
+   cd workshop-practice
+   pwd
+   ```
+   👀 `/home/내이름/workshop-practice`(macOS 는 `/Users/내이름/workshop-practice`)가 나오면 성공이다.
+
+2. **파일과 폴더를 만들고, 복사하고, 이름을 바꾼다.**
+   ```bash
+   # 폴더 2개, 빈 파일 1개, 글이 든 파일 1개를 만들고 → 복사 → 이름 바꾸기 → 목록 보기
+   mkdir notes docs
+   touch README.md
+   echo "작업실 첫 메모" > notes/todo.txt
+   cat notes/todo.txt
+   cp notes/todo.txt docs/
+   mv docs/todo.txt docs/plan.txt
+   ls -la . notes docs
+   ```
+   👀 `cat` 줄에서 `작업실 첫 메모` 가 나오고, 마지막 목록의 `docs:` 아래에 `plan.txt` 가 보이면 성공이다.
+
+   | 명령 | 쉬운 뜻 |
+   |---|---|
+   | `pwd` | 나 지금 어디 있어? |
+   | `mkdir 이름` | 폴더 만들어 |
+   | `cd 이름` | 그 폴더로 들어가(`cd ..` = 한 칸 위로) |
+   | `ls -la` | 여기 뭐 있어? 숨긴 것(`.` 으로 시작)까지 다 보여 줘 |
+   | `touch 이름` | 빈 파일 만들어 |
+   | `echo "글" > 파일` | 파일에 이 글을 써 |
+   | `cat 파일` | 파일 내용 보여 줘 |
+   | `cp 원본 어디로` / `mv 원본 새이름` | 복사해 / 옮겨(이름 바꾸기도 이걸로) |
+   | `rm 파일` | 지워(휴지통 없이 바로 사라지니 조심) |
+
+3. **서랍에 자물쇠를 건다 — 권한.**
+   ```bash
+   # 메모 파일을 나만 읽고 쓰게(600) 바꿨다가 → 원래대로(644) 되돌린다
+   ls -l notes/todo.txt
+   chmod 600 notes/todo.txt
+   ls -l notes/todo.txt
+   chmod 644 notes/todo.txt
+   ```
+   👀 맨 앞 글자가 `-rw-r--r--` → `-rw-------` 로 바뀌면 성공이다.
+   💬 무슨 뜻? `r` 읽기 · `w` 쓰기 · `x` 실행. 세 칸씩 **나 / 우리 팀 / 남** 순서다. `-rw-------` 는 「나만 읽고 쓸 수 있고 다른 사람은 아무것도 못 한다」. 숫자로는 읽기 4 + 쓰기 2 + 실행 1 을 더해 `6`(나) `0`(팀) `0`(남) = `600`.
+
+4. **Docker 가 깨어 있는지 인사해 본다.**
+   ```bash
+   # 버전 확인 → 연습용 「안녕」 컨테이너를 한 번 실행하고 바로 지운다(--rm)
+   docker --version
+   docker run --rm hello-world
+   ```
+   👀 아래 문장이 보이면 성공이다(처음엔 이미지를 내려받느라 몇 초 걸린다).
+   ```text
+   Hello from Docker!
+   This message shows that your installation appears to be working correctly.
+   ```
+   🆘 `Cannot connect to the Docker daemon` 이 나오면 Docker 가 꺼져 있는 것이다 → Docker Desktop 앱을 켜고(Linux 는 `sudo systemctl start docker`) 다시 친다.
+
+5. **리눅스 도시락 안에 들어가 본다.**
+   ```bash
+   # ubuntu 컨테이너를 만들어 그 안의 셸(bash)로 들어간다. 나오면(exit) 자동으로 지워진다(--rm)
+   docker run -it --rm ubuntu:22.04 bash
+   ```
+   👀 줄 앞이 `root@3f2a…:/#` 처럼 바뀌면 **도시락 안**에 들어온 것이다. 안에서 이렇게 쳐 본다.
+   ```bash
+   # 컨테이너 안에서 — 어떤 리눅스인지 보고 나간다
+   cat /etc/os-release | head -2
+   exit
+   ```
+   👀 `PRETTY_NAME="Ubuntu 22.04.5 LTS"` 가 나오고, `exit` 뒤에는 원래 내 터미널로 돌아온다.
+   💬 무슨 뜻? 내 컴퓨터가 Windows·macOS 여도 도시락 안은 Ubuntu 리눅스다. 이게 「어디서 열어도 똑같은 도시락」이다.
+
+6. **우리만의 웹 서버 레시피(이미지)를 만든다.** 먼저 이 저장소 폴더로 옮겨 간다 — `cd ` 까지 치고(뒤에 빈칸 하나) 압축 푼 `E1-1` 폴더를 터미널 창으로 **끌어다 놓은** 뒤 Enter.
+   ```bash
+   # 지금 폴더의 Dockerfile(레시피)로 e11-web:1.0 이라는 이미지를 만든다 — 마지막 점(.)까지 꼭 친다
+   docker build -t e11-web:1.0 .
+   docker images e11-web
+   ```
+   👀 목록에 `e11-web:1.0` 한 줄이 보이면 성공이다.
+   🆘 `failed to read dockerfile` 이 나오면 `E1-1` 폴더 밖에 있는 것이다 → `ls` 로 `Dockerfile` 이 보이는지 확인한다.
+   💬 무슨 뜻? `Dockerfile` 은 「`nginx:alpine` 이라는 검증된 웹 서버 레시피를 가져와서, `app/` 폴더의 우리 페이지를 얹어라」라고 적은 메모다. 자세한 설명은 [7절](#-7-기존-dockerfile-기반-커스텀-이미지).
+
+7. **도시락을 싸서 8081번 현관에 연결하고, 접속해 본다.**
+   ```bash
+   # e11-web:1.0 으로 컨테이너를 백그라운드(-d)로 띄우고, 내 컴퓨터 8081 → 컨테이너 80 으로 연결(-p)
+   docker run -d --name e11-web-8081 -p 8081:80 e11-web:1.0
+   docker ps
+   curl http://localhost:8081/health
+   ```
+   👀 `docker ps` 목록에 `e11-web-8081` 이 있고, 마지막 줄에 `ok` 가 나오면 성공이다.
+   (상태 칸은 처음엔 `health: starting`, 30초쯤 지나 다시 `docker ps` 를 치면 `healthy` 로 바뀐다.)
+   이제 브라우저 주소창에 **`http://localhost:8081`** 을 친다.
+   👀 「🛠️ 개발자 작업실이 열렸습니다」 페이지가 뜨면 성공이다 — 맨 위 사진과 같은 화면이다.
+   🆘 `port is already allocated` 가 나오면 8081 을 다른 프로그램이 쓰는 중이다 → `-p 8091:80` 처럼 앞 숫자를 바꾸고, 브라우저도 그 번호로 접속한다.
+
+8. **창문(바인드 마운트)을 내고, 바깥에서 고쳐 본다.**
+   ```bash
+   # 실습용 페이지를 「수정 전」으로 써 두고 → 이 폴더를 컨테이너에 창문으로 연결해 8083 으로 띄운다
+   echo "<h1>바인드 마운트 — 수정 전</h1>" > bind-site/index.html
+   docker run -d --name e11-bind -p 8083:80 -v "$PWD/bind-site":/usr/share/nginx/html:ro nginx:alpine
+   curl http://localhost:8083/
+   ```
+   👀 `<h1>바인드 마운트 — 수정 전</h1>` 이 나온다. 이제 **컨테이너는 그대로 두고** 내 컴퓨터의 파일만 고친다.
+   ```bash
+   # 바깥(내 컴퓨터)의 파일만 바꾸고 → 다시 접속
+   echo "<h1>바인드 마운트 — 호스트에서 수정한 뒤</h1>" > bind-site/index.html
+   curl http://localhost:8083/
+   ```
+   👀 `<h1>바인드 마운트 — 호스트에서 수정한 뒤</h1>` 로 바뀌어 있으면 성공이다. 다시 만들거나 껐다 켜지 않았는데도 바뀌었다 — 창문으로 보이는 것이기 때문이다.
+
+9. **보관함(볼륨)에 메모를 넣고, 도시락을 버려도 남는지 본다.**
+   ```bash
+   # 보관함 e11-data 를 만들고 → 그걸 붙인 컨테이너 안에서 메모를 쓴 뒤 → 컨테이너를 지운다
+   docker volume create e11-data
+   docker run -d --name e11-vol1 -v e11-data:/data ubuntu:22.04 sleep infinity
+   docker exec e11-vol1 bash -c "echo 컨테이너가 사라져도 남아야 하는 기록 > /data/hello.txt"
+   docker rm -f e11-vol1
+   ```
+   ```bash
+   # 새 컨테이너에 같은 보관함을 붙이고 → 메모가 아직 있는지 읽는다
+   docker run -d --name e11-vol2 -v e11-data:/data ubuntu:22.04 sleep infinity
+   docker exec e11-vol2 cat /data/hello.txt
+   ```
+   👀 `컨테이너가 사라져도 남아야 하는 기록` 이 나오면 성공이다. 처음 컨테이너는 지웠지만 보관함은 남아 있었다.
+
+10. **Git 에 내 이름표를 단다.** 따옴표 안을 **내 이름·이메일**로 바꿔서 친다.
+    ```bash
+    # Git 이 기록마다 붙일 내 이름·이메일, 새 저장소의 기본 갈래 이름(main)을 정하고 → 확인
+    git config --global user.name "내 이름"
+    git config --global user.email "내이메일@example.com"
+    git config --global init.defaultBranch main
+    git config --list
+    ```
+    👀 목록에 `user.name=내 이름`, `user.email=…`, `init.defaultbranch=main` 이 보이면 성공이다.
+    💬 무슨 뜻? Git 은 「누가 언제 무엇을 바꿨는지」 적는 일기장이다. 그 일기장에 쓸 내 이름을 한 번 정해 두는 것이다. GitHub 에 올리는 방법은 [10절](#-10-git-설정-및-github-연동).
+
+11. **(보너스) 도시락 두 개를 한 번에 — Docker Compose.**
+    ```bash
+    # compose 폴더로 들어가 → 파일에 적힌 두 서비스(web, helper)를 한 번에 띄우고 → web 이 helper 를 이름으로 불러 본다
+    cd compose
+    docker compose up -d
+    docker compose exec web wget -qO- http://helper:8000/
+    docker compose down
+    cd ..
+    ```
+    👀 `helper 서비스 응답: 같은 compose 네트워크에서 서비스 이름(helper)으로 찾아왔다` 가 나오면 성공이다.
+    💬 무슨 뜻? 긴 `docker run …` 명령들을 `compose.yaml` 파일 하나에 적어 두고 `up`(띄우기)·`down`(내리기) 한 번으로 끝낸다. 같은 파일 안의 도시락끼리는 **이름(helper)** 으로 서로를 찾는다.
+
+12. **치우기.** 실습에서 만든 것을 모두 지운다(다른 프로그램의 컨테이너는 건드리지 않는다).
+    ```bash
+    # 이 실습에서 만든 컨테이너 → 보관함 → 이미지를 이름으로 골라 지운다
+    docker rm -f e11-web-8081 e11-bind e11-vol2
+    docker volume rm e11-data
+    docker rmi e11-web:1.0 nginx:alpine ubuntu:22.04 hello-world busybox:1.36
+    docker ps -a
+    ```
+    👀 마지막 `docker ps -a` 목록에 `e11-` 로 시작하는 이름이 하나도 없으면 끝이다. 🎉
+    (11단계를 건너뛰었다면 `busybox:1.36` 에서 `No such image` 가 나오는데, 원래 없는 걸 지우려던 것이라 괜찮다.)
+    연습장 폴더도 지우고 싶으면 `rm -r ~/workshop-practice`.
 
 ## 🧭 프로젝트 개요
+> 🧒 **쉽게 말하면** — 위 [따라 하기](#-따라-하기)를 이 컴퓨터에서 실제로 해 보고, 친 명령과 나온 화면을 그대로 남긴 기록이다.
+
 내 컴퓨터에 「코드가 어디서나 똑같이 돌아가는」 개발 작업실을 직접 세팅하고, 그 과정을 명령과 출력으로 남긴 기술 문서다.
 터미널로 폴더·파일·권한을 다루고, Docker 로 컨테이너를 띄우고, 기존 `nginx:alpine` 이미지를 바탕으로 **직접 만든 웹 서버 이미지**를
 포트 매핑·바인드 마운트·볼륨까지 검증했다. 모든 로그는 이 컴퓨터에서 실제로 실행한 출력이며 `logs/` 에 원본이 있다.
@@ -85,21 +295,6 @@ flowchart LR
 | ✅ | 민감정보 마스킹 | [11](#-11-보안-및-개인정보-보호) |
 | ✅ | 트러블슈팅 3건 · 보너스 Compose 단일/멀티 | [트러블슈팅](#-트러블슈팅) · [보너스](#-보너스--docker-compose) |
 
-## 🧰 준비물
-- Linux 또는 macOS 터미널(Windows 는 WSL2). 이 문서는 Linux 에서 했다.
-- Docker Engine + Compose 플러그인(확인: `docker --version`, `docker compose version`).
-- Git(확인: `git --version`), curl, 웹 브라우저.
-- 비어 있는 호스트 포트 8081~8085(사용 중이면 다른 번호로 바꾼다 — 트러블슈팅 2).
-- 전제 지식: 없음. 명령을 위에서부터 그대로 따라 치면 된다.
-
-## 🚶 따라 하기
-1. 저장소를 받는다: `git clone <저장소 주소> && cd E1-1`
-2. 이미지를 만든다: `docker build -t e11-web:1.0 .`
-3. 두 포트로 띄운다: `docker run -d --name e11-web-8081 -p 8081:80 e11-web:1.0` (8082 도 같은 방식)
-4. 확인한다: `curl http://localhost:8081/health` → `ok`, 브라우저로 `http://localhost:8081` 접속
-5. 보너스: `cd compose && docker compose up -d` → `docker compose exec web wget -qO- http://helper:8000/`
-6. 정리한다: `docker rm -f e11-web-8081 e11-web-8082 && docker compose down`
-
 ---
 
 ## 📁 1. 제출 저장소 및 기술 문서
@@ -119,6 +314,8 @@ flowchart LR
 ```
 
 ## ⌨️ 2. 터미널 조작 로그
+> 🧒 따라 하기 1~2단계(폴더 만들기·파일 다루기)의 실제 기록이다. 명령마다 쉬운 뜻은 2단계 표에 있다.
+
 원본: [logs/01-terminal.log](logs/01-terminal.log) — 현재 위치·숨김 파일 포함 목록·이동·생성·복사·이름 변경·삭제·내용 확인·빈 파일.
 
 ```console
@@ -146,6 +343,8 @@ $ ls -la . notes docs
 `practice/` 폴더에 결과(`README.md`, `notes/todo.txt`, `docs/plan.txt`)가 그대로 남아 있다.
 
 ## 🔐 3. 권한 실습
+> 🧒 따라 하기 3단계(서랍 자물쇠)의 실제 기록이다. 파일 하나, 폴더 하나에 자물쇠를 걸었다 풀었다.
+
 원본: [logs/02-permission.log](logs/02-permission.log)
 
 ```console
@@ -172,6 +371,8 @@ drwxr-xr-x 755 docs
 | 디렉터리 `docs` | `755` rwxr-xr-x | `700` rwx------ | 다른 사람은 목록 보기·들어가기 불가 → 다시 755 |
 
 ## 🐳 4. Docker 설치 및 기본 점검
+> 🧒 「Docker 가 설치돼 있고 깨어 있나?」를 확인한 기록이다. `docker info` 가 대답하면 깨어 있는 것이다.
+
 원본: [logs/03-docker-basic.log](logs/03-docker-basic.log)
 
 ```console
@@ -193,6 +394,8 @@ $ sudo docker info            # 발췌 — 데몬이 응답하면 Server 정보�
 ```
 
 ## 📊 5. Docker 기본 운영 명령
+> 🧒 도시락 관리 명령 모음이다. `images` = 레시피 목록, `ps` = 지금 열려 있는 도시락, `logs` = 도시락이 한 말, `stats` = 도시락이 쓰는 힘(CPU·메모리), `stop`/`start` = 닫기/다시 열기.
+
 원본: [logs/03-docker-basic.log](logs/03-docker-basic.log), [logs/04-container.log](logs/04-container.log)
 
 ```console
@@ -221,6 +424,8 @@ $ sudo docker start e11-ticker
 `ps` 는 실행 중인 것만, `ps -a` 는 멈춘 것(`Exited`)까지 보여 준다.
 
 ## 📦 6. 컨테이너 실행 실습
+> 🧒 따라 하기 4~5단계의 실제 기록이다. 도시락은 **안에서 하는 일이 끝나면 같이 닫힌다** — 그래서 금방 끝나는 일(`echo`)이면 바로 닫히고, 계속 도는 일(`sleep infinity`, 웹 서버)이면 계속 열려 있다.
+
 원본: [logs/03-docker-basic.log](logs/03-docker-basic.log), [logs/04-container.log](logs/04-container.log)
 
 ```console
@@ -265,6 +470,8 @@ root   41     0  ps -ef                          # exec 는 옆에 새 프로세
 컨테이너의 수명은 PID 1 의 수명이다. `echo` 처럼 금방 끝나는 명령이면 컨테이너도 바로 `Exited`, `sleep infinity` 나 웹 서버처럼 계속 도는 명령이면 유지된다.
 
 ## 🧱 7. 기존 Dockerfile 기반 커스텀 이미지
+> 🧒 따라 하기 6단계의 실제 기록이다. 처음부터 레시피를 쓰지 않고, 이미 잘 되는 웹 서버 레시피(`nginx:alpine`)에 **우리 페이지만 얹었다.**
+
 원본: [logs/05-dockerfile-port.log](logs/05-dockerfile-port.log) · 방식 **(A) 웹 서버 베이스 이미지 + 정적 콘텐츠·설정 교체**
 
 - **기존 베이스**: 공식 `nginx:alpine` — 이미 잘 동작하는 웹 서버 이미지를 그대로 쓰고, 바꿀 것만 얹는다.
@@ -300,6 +507,8 @@ $ sudo docker inspect --format "{{json .Config.Labels}}" e11-web:1.0
 ```
 
 ## 🌐 8. 포트 매핑 및 접속 증거
+> 🧒 따라 하기 7단계의 실제 기록이다. 같은 레시피로 도시락 두 통을 싸서 현관 번호만 8081·8082 로 다르게 달았다.
+
 원본: [logs/05-dockerfile-port.log](logs/05-dockerfile-port.log)
 
 ```console
@@ -333,6 +542,8 @@ $ curl -s http://localhost:8082/ | grep -o "<h1>.*</h1>"
 > 같은 이미지라 8082 도 같은 페이지가 나온다.
 
 ## 💾 9. 바인드 마운트와 Docker 볼륨
+> 🧒 따라 하기 8단계(창문)와 9단계(보관함)의 실제 기록이다.
+
 
 ### 9-1. 바인드 마운트 — 호스트 변경이 컨테이너에 바로 반영
 원본: [logs/06-bind-mount.log](logs/06-bind-mount.log)
@@ -371,6 +582,8 @@ e11-data local /var/lib/docker/volumes/e11-data/_data
 | 쓰임 | 개발 중 소스 수정을 바로 반영 | DB 데이터처럼 컨테이너보다 오래 살아야 하는 데이터 |
 
 ## 🌱 10. Git 설정 및 GitHub 연동
+> 🧒 따라 하기 10단계(Git 이름표)의 실제 기록이다. **Git** 은 내 컴퓨터 안의 일기장, **GitHub** 는 그 일기장을 인터넷에 올려 두는 도서관이다.
+
 원본: [logs/08-git.log](logs/08-git.log)
 
 > 이 PC 의 실제 전역 Git 설정을 바꾸지 않으려고 실습용 전역 설정 파일(`GIT_CONFIG_GLOBAL`)을 따로 지정해 `--global` 명령을 실행했다.
@@ -402,6 +615,8 @@ main
 - [ ] (보너스) SSH 키 등록 후 `ssh -T git@github.com` 결과
 
 ## 🛡️ 11. 보안 및 개인정보 보호
+> 🧒 기록을 남에게 보여 주기 전에 **내 컴퓨터 이름·비밀번호 같은 것을 가린** 목록이다.
+
 - `docker info` 의 호스트명(`Name`)과 데몬 ID(`ID`)는 `<… 마스킹>` 으로 바꿨다.
 - 로그의 홈 경로는 `~` 로 줄였다.
 - 토큰·비밀번호·개인키는 이 저장소 어디에도 없다. `.env` 는 `.gitignore` 에 넣어 실수로 올라가지 않게 했다.
@@ -410,6 +625,8 @@ main
 ---
 
 ## 🔧 트러블슈팅
+> 🧒 하다가 막혔던 곳 3개와, 어떻게 풀었는지다. 같은 에러가 나오면 여기부터 본다.
+
 
 ### 1. `docker ps` → permission denied
 > [!WARNING]
@@ -446,6 +663,8 @@ main
 종료 코드가 137(128+9)이 됐다. 웹 서버(nginx)처럼 신호를 처리하는 프로그램은 바로 정상 종료한다.
 
 ## 🎁 보너스 — Docker Compose
+> 🧒 따라 하기 11단계의 실제 기록이다. 긴 `docker run …` 명령을 **파일 하나로 적어 두고 한 번에 실행**하는 도구다.
+
 원본: [logs/09-compose.log](logs/09-compose.log)
 
 **1) 단일 서비스** — `compose/compose.single.yaml`: `docker run -d -p 8084:80 -e APP_ENV=… e11-web:1.0` 을 파일로 옮겼다.
@@ -499,12 +718,29 @@ flowchart LR
 | Git vs GitHub | Git 은 내 컴퓨터에서 변경 이력을 관리하는 **도구**, GitHub 는 그 저장소를 인터넷에 올려 공유·협업(PR·이슈)하는 **서비스**다. Git 만으로도 버전 관리는 되고, GitHub 는 원격 저장소가 필요할 때 쓴다. |
 
 ## 📖 용어 사전
-- **이미지**: 컨테이너를 만드는 읽기 전용 설계도(파일 시스템 + 실행 명령).
-- **컨테이너**: 이미지로 띄운 실행 중인 격리 환경. 지우면 안의 변경은 사라진다.
-- **데몬**: 뒤에서 계속 돌며 요청을 처리하는 프로그램. Docker 는 `dockerd` 가 컨테이너를 관리한다.
-- **PID 1**: 컨테이너 안에서 처음 실행된 주 프로세스. 이게 끝나면 컨테이너도 끝난다.
-- **헬스체크**: 서비스가 정상인지 주기적으로 확인하는 검사(`HEALTHCHECK`).
-- **Compose**: 여러 컨테이너의 실행 설정을 YAML 파일 하나로 적고 한 번에 올리고 내리는 도구.
+쉬운 말 순서로 적었다. 모르는 말이 나오면 여기서 찾는다.
+
+- **터미널**: 마우스 대신 글자로 컴퓨터에 일을 시키는 창. 명령을 치고 Enter 를 누르면 실행된다.
+- **명령 / 옵션**: 터미널에 치는 한 줄(`ls`) / 그 명령의 동작을 바꾸는 꼬리표(`-la`, `-p 8081:80`).
+- **경로(절대 / 상대)**: 파일의 주소. 절대 경로는 맨 꼭대기(`/`)부터 다 적은 주소, 상대 경로는 「지금 있는 곳에서」 적은 주소(`notes/todo.txt`).
+- **홈 폴더(`~`)**: 내 계정의 기본 폴더. `cd ~` 하면 여기로 간다.
+- **권한(r/w/x)**: 파일에 대한 읽기·쓰기·실행 허락. 나 / 우리 팀 / 남 세 칸으로 나눠 정한다.
+- **sudo**: 「관리자 권한으로 해 줘」. 컴퓨터 비밀번호를 물어본다.
+- **WSL**: Windows 안에서 리눅스(Ubuntu)를 돌리는 기능. 이 문서의 명령을 Windows 에서 칠 때 쓴다.
+- **Docker**: 프로그램을 「도시락통」(컨테이너)에 담아 어느 컴퓨터에서나 똑같이 돌게 해 주는 도구.
+- **이미지**: 컨테이너를 만드는 레시피(설계도). 읽기 전용이라 바뀌지 않는다.
+- **컨테이너**: 이미지로 실제로 만든 실행 중인 도시락. 지우면 안에서 바꾼 것도 같이 사라진다.
+- **Dockerfile**: 이미지를 어떻게 만들지 적은 레시피 메모(`FROM` 무엇을 바탕으로, `COPY` 무엇을 얹어서).
+- **데몬**: 뒤에서 조용히 계속 도는 일꾼 프로그램. Docker 는 `dockerd` 가 도시락들을 관리한다.
+- **포트 / 포트 매핑**: 프로그램이 손님을 받는 현관 번호 / 내 컴퓨터 현관과 컨테이너 현관을 이어 주는 것(`-p 8081:80`).
+- **localhost**: 「바로 이 컴퓨터」를 가리키는 주소. `http://localhost:8081` = 내 컴퓨터 8081번 문.
+- **curl**: 터미널에서 웹 페이지를 받아 글자로 보여 주는 도구. 브라우저의 글자판이다.
+- **바인드 마운트**: 내 컴퓨터 폴더를 컨테이너 안에 창문처럼 연결하는 것. 바깥에서 고치면 안에서도 바로 바뀐다.
+- **볼륨**: Docker 가 따로 챙겨 두는 보관함. 컨테이너를 지워도 남는다.
+- **PID 1**: 컨테이너 안에서 맨 처음 켜진 주인공 프로그램. 이게 끝나면 도시락도 닫힌다.
+- **헬스체크**: 「살아 있니?」를 주기적으로 물어보는 검사(`HEALTHCHECK`). 대답하면 `healthy`.
+- **Compose**: 여러 컨테이너의 실행 방법을 YAML 파일 하나에 적어 두고 한 번에 띄우고(`up`) 내리는(`down`) 도구.
+- **Git / GitHub**: 바뀐 기록을 남기는 일기장 도구 / 그 일기장을 인터넷에 올려 공유하는 서비스.
 
 ## 🔗 과정 연결
 - 입학 연수 1주차 시험(개발 환경 세팅)은 이 미션의 명령을 그대로 묻는다 — `pwd`·`mkdir`·`ls -la`·`touch`·`cat`·`cp`·`rm`·`git init`·`git add .`·`docker --version`·`docker pull nginx`·`docker images`·`docker ps -a`.
