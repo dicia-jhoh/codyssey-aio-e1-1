@@ -1,0 +1,19 @@
+$ ls -l notes/todo.txt
+-rw-r--r-- 1 learner  learner  21 10월 21일  17:12 notes/todo.txt
+$ chmod 600 notes/todo.txt
+$ ls -l notes/todo.txt
+-rw------- 1 learner  learner  21 10월 21일  17:12 notes/todo.txt
+$ chmod 644 notes/todo.txt
+$ ls -l notes/todo.txt
+-rw-r--r-- 1 learner  learner  21 10월 21일  17:12 notes/todo.txt
+$ ls -ld docs
+drwxr-xr-x 1 learner  learner  16 10월 21일  17:12 docs
+$ chmod 700 docs
+$ ls -ld docs
+drwx------ 1 learner  learner  16 10월 21일  17:12 docs
+$ chmod 755 docs
+$ ls -ld docs
+drwxr-xr-x 1 learner  learner  16 10월 21일  17:12 docs
+$ stat -c "%A %a %n" notes/todo.txt docs
+-rw-r--r-- 644 notes/todo.txt
+drwxr-xr-x 755 docs

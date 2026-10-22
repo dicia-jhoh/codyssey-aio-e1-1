@@ -1,0 +1,51 @@
+$ pwd
+~/Projects/codyssey-daejeon/artifacts/repos/gyeongnam/E1-1
+$ mkdir -p practice
+$ cd practice
+$ pwd
+~/Projects/codyssey-daejeon/artifacts/repos/gyeongnam/E1-1/practice
+$ ls -la
+total 0
+drwxr-xr-x 1 learner  learner   0 10월 21일  17:12 .
+drwxr-xr-x 1 learner  learner  32 10월 21일  17:12 ..
+$ mkdir notes docs
+$ touch README.md
+$ echo "작업실 첫 메모" > notes/todo.txt
+$ cat notes/todo.txt
+작업실 첫 메모
+$ cp notes/todo.txt docs/
+$ mv docs/todo.txt docs/plan.txt
+$ touch temp.txt
+$ ls -la
+total 0
+drwxr-xr-x 1 learner  learner  52 10월 21일  17:12 .
+drwxr-xr-x 1 learner  learner  32 10월 21일  17:12 ..
+drwxr-xr-x 1 learner  learner  16 10월 21일  17:12 docs
+drwxr-xr-x 1 learner  learner  16 10월 21일  17:12 notes
+-rw-r--r-- 1 learner  learner   0 10월 21일  17:12 README.md
+-rw-r--r-- 1 learner  learner   0 10월 21일  17:12 temp.txt
+$ rm temp.txt
+$ ls -la . notes docs
+.:
+total 0
+drwxr-xr-x 1 learner  learner  36 10월 21일  17:12 .
+drwxr-xr-x 1 learner  learner  32 10월 21일  17:12 ..
+drwxr-xr-x 1 learner  learner  16 10월 21일  17:12 docs
+drwxr-xr-x 1 learner  learner  16 10월 21일  17:12 notes
+-rw-r--r-- 1 learner  learner   0 10월 21일  17:12 README.md
+
+docs:
+total 4
+drwxr-xr-x 1 learner  learner  16 10월 21일  17:12 .
+drwxr-xr-x 1 learner  learner  36 10월 21일  17:12 ..
+-rw-r--r-- 1 learner  learner  21 10월 21일  17:12 plan.txt
+
+notes:
+total 4
+drwxr-xr-x 1 learner  learner  16 10월 21일  17:12 .
+drwxr-xr-x 1 learner  learner  36 10월 21일  17:12 ..
+-rw-r--r-- 1 learner  learner  21 10월 21일  17:12 todo.txt
+$ cat README.md
+$ cd ..
+$ pwd
+~/Projects/codyssey-daejeon/artifacts/repos/gyeongnam/E1-1
