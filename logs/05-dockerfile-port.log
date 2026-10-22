@@ -1,0 +1,104 @@
+$ cat Dockerfile
+# 기존 웹 서버 이미지(nginx:alpine)를 베이스로 정적 콘텐츠와 운영 설정만 바꾼다
+FROM nginx:alpine
+
+# 1) 이미지 설명 — docker inspect 로 누가·무엇을 만들었는지 확인할 수 있게
+LABEL org.opencontainers.image.title="e11-web" \
+      org.opencontainers.image.description="E1-1 개발자 작업실 정적 웹 서버"
+
+# 2) 실행 환경 표시 — 컨테이너 안에서 printenv APP_ENV 로 확인
+ENV APP_ENV=dev
+
+# 3) 정적 콘텐츠 교체 — 기본 nginx 환영 페이지 대신 우리 페이지
+COPY app/ /usr/share/nginx/html/
+
+# 4) 헬스체크 — 30초마다 /health 를 받아 실패하면 unhealthy 로 표시
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD wget -qO- http://127.0.0.1/health || exit 1
+
+EXPOSE 80
+$ sudo docker build -t e11-web:1.0 .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 824B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/nginx:alpine
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/2] FROM docker.io/library/nginx:alpine@sha256:892bb2152464f0c5d8972593a5f5afaf8054552580b699d95f8ff4af08c2d33d
+#4 resolve docker.io/library/nginx:alpine@sha256:892bb2152464f0c5d8972593a5f5afaf8054552580b699d95f8ff4af08c2d33d 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 1.27kB done
+#5 DONE 0.1s
+
+#4 [1/2] FROM docker.io/library/nginx:alpine@sha256:892bb2152464f0c5d8972593a5f5afaf8054552580b699d95f8ff4af08c2d33d
+#4 DONE 0.2s
+
+#4 [1/2] FROM docker.io/library/nginx:alpine@sha256:892bb2152464f0c5d8972593a5f5afaf8054552580b699d95f8ff4af08c2d33d
+#4 extracting sha256:e2de96513ba9eb53b431787ec8a65cdde380ac4772a3e4c4b714dcfde2a102b5 0.1s done
+#4 extracting sha256:6711e0c4f5a79e8db637a3412394f29da647e54476d67c5b211a11527568ddc5 0.1s done
+#4 extracting sha256:3bf3671a4e6a18510ca49e3a4a226c2ef734a646e01e34e1ad0eff5faa01e3a0
+#4 extracting sha256:3bf3671a4e6a18510ca49e3a4a226c2ef734a646e01e34e1ad0eff5faa01e3a0 0.0s done
+#4 extracting sha256:b44956913298a55652fa97af34d296339c089250911e46e1a1c0eab8a88538c7 0.0s done
+#4 extracting sha256:710ec83ca6cd71fa5636d861343b5660636728f71992fd1b68914e03c7af3ad4 0.0s done
+#4 extracting sha256:70683d58fa5c20b5b31c9998a16f6634720d3393dc62934a608754abe449fe3b 0.0s done
+#4 extracting sha256:6638b436592c96dd194db76a6b786b60b344d80ebe160e646c871d4e7eff25b5 0.0s done
+#4 extracting sha256:1fdd0614a47ec2896aea36fb280a7b5e8655614dfb56ec1a64002131791de601
+#4 extracting sha256:1fdd0614a47ec2896aea36fb280a7b5e8655614dfb56ec1a64002131791de601 0.3s done
+#4 DONE 0.7s
+
+#6 [2/2] COPY app/ /usr/share/nginx/html/
+#6 DONE 0.1s
+
+#7 exporting to image
+#7 exporting layers 0.1s done
+#7 exporting manifest sha256:37d98db0f03496508b117bcf79c1360c45862c28475a4e4c64fdb5b3338bb18e 0.0s done
+#7 exporting config sha256:0d94ef3ba18c87bf5814ca4643dbfc400119e819bd99d1c0823852dad3953732 done
+#7 exporting attestation manifest sha256:b400daf2949f4264df2cb2706e5edc51a1f4ba6efeed188cb0e132f3779fae5a 0.0s done
+#7 exporting manifest list sha256:0652f427eb315fd71ceb92a33508565d58a3a162f6317291753a300bcab20466 0.0s done
+#7 naming to docker.io/library/e11-web:1.0 done
+#7 unpacking to docker.io/library/e11-web:1.0 0.0s done
+#7 DONE 0.2s
+$ sudo docker images e11-web
+IMAGE         ID             DISK USAGE   CONTENT SIZE   EXTRA
+e11-web:1.0   0652f427eb31        103MB         28.8MB        
+$ sudo docker run -d --name e11-web-8081 -p 8081:80 e11-web:1.0
+6db66b7caf0ac4390791264893e2ba83fc643357f5595c9336373bdc342cc49c
+$ sudo docker run -d --name e11-web-8082 -p 8082:80 e11-web:1.0
+5a95e4f3b89e661c0e716f093d5505e9b11fdd46c4a67b006c515156e2d23d5a
+$ sudo docker ps --filter name=e11-web
+CONTAINER ID   IMAGE         COMMAND                  CREATED        STATUS                                     PORTS                                     NAMES
+5a95e4f3b89e   e11-web:1.0   "/docker-entrypoint.…"   1 second ago   Up Less than a second (health: starting)   0.0.0.0:8082->80/tcp, [::]:8082->80/tcp   e11-web-8082
+6db66b7caf0a   e11-web:1.0   "/docker-entrypoint.…"   1 second ago   Up Less than a second (health: starting)   0.0.0.0:8081->80/tcp, [::]:8081->80/tcp   e11-web-8081
+$ curl -s http://localhost:8081/health
+ok
+$ curl -s -o /dev/null -w "HTTP %{http_code}\n" http://localhost:8081/
+HTTP 200
+$ curl -s http://localhost:8082/ | grep -o "<h1>.*</h1>"
+<h1>🛠️ 개발자 작업실이 열렸습니다</h1>
+$ sudo docker exec e11-web-8081 printenv APP_ENV
+dev
+$ sudo docker inspect --format "{{json .Config.Labels}}" e11-web:1.0
+{"maintainer":"NGINX Docker Maintainers <docker-maint@nginx.com>","org.opencontainers.image.description":"E1-1 개발자 작업실 정적 웹 서버","org.opencontainers.image.title":"e11-web"}
+$ sudo docker ps --filter name=e11-web --format "{{.Names}}  {{.Status}}  {{.Ports}}"
+e11-web-8082  Up 32 seconds (healthy)  0.0.0.0:8082->80/tcp, [::]:8082->80/tcp
+e11-web-8081  Up 32 seconds (healthy)  0.0.0.0:8081->80/tcp, [::]:8081->80/tcp
+$ sudo docker run -d --name e11-web-8080 -p 8080:80 e11-web:1.0
+b24b7f218e425370d0ba4f274bdd3b64be69a463881b7f250775630a6ed290ad
+docker: Error response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint e11-web-8080 (f4e15fe02451865ac7578ddea536ba3edf8e5fa177db6d2e7951e2cba4618bb4): Bind for 127.0.0.1:8080 failed: port is already allocated
+
+Run 'docker run --help' for more information
+$ sudo docker rm e11-web-8080
+e11-web-8080
+$ ss -ltn | grep ":8080 "
+LISTEN 0      4096                                127.0.0.1:8080       0.0.0.0:*
+$ sudo docker ps --format "{{.Names}}  {{.Ports}}" | grep 8080
+searxng  127.0.0.1:8080->8080/tcp
