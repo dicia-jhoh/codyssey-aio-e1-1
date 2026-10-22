@@ -1,0 +1,11 @@
+# 보너스 1 — 단일 서비스: docker run 옵션(-p, -e, 이미지)을 파일로 문서화한다
+name: e11-single
+services:
+  web:
+    build:
+      context: ..
+    image: e11-web:1.0
+    ports:
+      - "8084:80"
+    environment:
+      APP_ENV: ${APP_ENV:-dev}   # 실행할 때 APP_ENV=... 로 바꿔 넣을 수 있다

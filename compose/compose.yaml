@@ -1,0 +1,18 @@
+# 보너스 2 — 멀티 컨테이너: 웹 서버 + 보조 서비스(helper)가 같은 네트워크에서 이름으로 통신
+name: e11-multi
+services:
+  web:
+    image: e11-web:1.0
+    build:
+      context: ..
+    ports:
+      - "8085:80"
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+    depends_on:
+      - helper
+  helper:
+    image: busybox:1.36
+    command: ["httpd", "-f", "-p", "8000", "-h", "/www"]
+    volumes:
+      - ./helper:/www:ro

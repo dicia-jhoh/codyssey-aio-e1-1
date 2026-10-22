@@ -1,0 +1,71 @@
+$ sudo docker compose -f compose.single.yaml up -d
+ Network e11-single_default Creating 
+ Network e11-single_default Creating 
+ Network e11-single_default Created 
+ Network e11-single_default Created 
+ Container e11-single-web-1 Creating 
+ Container e11-single-web-1 Created 
+ Container e11-single-web-1 Starting 
+ Container e11-single-web-1 Started 
+$ sudo docker compose -f compose.single.yaml ps
+NAME               IMAGE         COMMAND                  SERVICE   CREATED                  STATUS                                     PORTS
+e11-single-web-1   e11-web:1.0   "/docker-entrypoint.…"   web       Less than a second ago   Up Less than a second (health: starting)   0.0.0.0:8084->80/tcp, [::]:8084->80/tcp
+$ curl -s -o /dev/null -w "HTTP %{http_code}\n" http://localhost:8084/
+HTTP 200
+$ sudo docker compose -f compose.single.yaml exec web printenv APP_ENV
+dev
+$ sudo docker compose -f compose.single.yaml down
+ Container e11-single-web-1 Stopping 
+ Container e11-single-web-1 Stopped 
+ Container e11-single-web-1 Removing 
+ Container e11-single-web-1 Removed 
+ Network e11-single_default Removing 
+ Network e11-single_default Removed 
+$ sudo APP_ENV=staging docker compose up -d
+ Image busybox:1.36 Pulling 
+ 034d6572bf28 Pulling fs layer 0B
+ 034d6572bf28 Download complete 0B
+ 034d6572bf28 Extracting 1B
+ 034d6572bf28 Pull complete 0B
+ 5108bc06b83a Download complete 0B
+ Image busybox:1.36 Pulled 
+ Network e11-multi_default Creating 
+ Network e11-multi_default Creating 
+ Network e11-multi_default Created 
+ Network e11-multi_default Created 
+ Container e11-multi-helper-1 Creating 
+ Container e11-multi-helper-1 Created 
+ Container e11-multi-web-1 Creating 
+ Container e11-multi-web-1 Created 
+ Container e11-multi-helper-1 Starting 
+ Container e11-multi-helper-1 Started 
+ Container e11-multi-web-1 Starting 
+ Container e11-multi-web-1 Started 
+$ sudo docker compose ps
+NAME                 IMAGE          COMMAND                  SERVICE   CREATED        STATUS                                     PORTS
+e11-multi-helper-1   busybox:1.36   "httpd -f -p 8000 -h…"   helper    1 second ago   Up Less than a second                      
+e11-multi-web-1      e11-web:1.0    "/docker-entrypoint.…"   web       1 second ago   Up Less than a second (health: starting)   0.0.0.0:8085->80/tcp, [::]:8085->80/tcp
+$ sudo docker compose exec web printenv APP_ENV
+staging
+$ sudo docker compose exec web wget -qO- http://helper:8000/
+helper 서비스 응답: 같은 compose 네트워크에서 서비스 이름(helper)으로 찾아왔다
+$ curl -s http://localhost:8085/health
+ok
+$ sudo docker compose logs --tail 3 helper web
+web-1  | 2026/10/21 08:23:27 [notice] 1#1: start worker process 44
+web-1  | 2026/10/21 08:23:27 [notice] 1#1: start worker process 45
+web-1  | 172.21.0.1 - - [21/Oct/2026:08:23:27 +0000] "GET /health HTTP/1.1" 200 3 "-" "curl/8.23.0" "-"
+f1a9d07f290a   e11-multi_default   bridge    local
+$ sudo docker compose down
+ Container e11-multi-web-1 Stopping 
+ Container e11-multi-web-1 Stopped 
+ Container e11-multi-web-1 Removing 
+ Container e11-multi-web-1 Removed 
+ Container e11-multi-helper-1 Stopping 
+ Container e11-multi-helper-1 Stopped 
+ Container e11-multi-helper-1 Removing 
+ Container e11-multi-helper-1 Removed 
+ Network e11-multi_default Removing 
+ Network e11-multi_default Removed 
+$ sudo docker compose ps -a
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
