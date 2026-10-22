@@ -1,13 +1,40 @@
-# 개발자 작업실 꾸미기 — 터미널 · 권한 · Docker · Git
+<div align="center">
 
-AI올인원 입학연수 · 개발 입문 E1-1 (미션 185000)
+# 🛠️ 개발자 작업실 꾸미기
 
-## 프로젝트 개요
+### 터미널 · 권한 · Docker · Git 을 손으로 세팅하고 전부 기록했다
+
+![Mission](https://img.shields.io/badge/Mission-E1--1%20%C2%B7%20185000-222222)
+![Docker](https://img.shields.io/badge/Docker-29.9.1-2496ED?logo=docker&logoColor=white)
+![Compose](https://img.shields.io/badge/Compose-5.6.0-2496ED)
+![Git](https://img.shields.io/badge/Git-2.56.0-F05032?logo=git&logoColor=white)
+![Logs](https://img.shields.io/badge/Logs-10%20files-6A6A6A)
+![Troubleshooting](https://img.shields.io/badge/Troubleshooting-3-FF385C)
+
+AI올인원 입학연수 · 개발 입문
+
+<img src="docs/screenshots/browser-8081.png" alt="브라우저 주소창 localhost:8081 과 직접 만든 이미지의 응답 페이지" width="560">
+
+<sub>직접 만든 이미지 <code>e11-web:1.0</code> 을 <code>-p 8081:80</code> 으로 띄워 브라우저로 접속한 화면</sub>
+
+</div>
+
+---
+
+## 📚 목차
+| 시작 | 요구사항(원문 번호) | 더 보기 |
+|---|---|---|
+| [프로젝트 개요](#-프로젝트-개요) | [1. 저장소·기술 문서](#-1-제출-저장소-및-기술-문서) · [2. 터미널](#-2-터미널-조작-로그) · [3. 권한](#-3-권한-실습) | [트러블슈팅](#-트러블슈팅) |
+| [실행 환경](#-실행-환경) | [4. Docker 점검](#-4-docker-설치-및-기본-점검) · [5. 운영 명령](#-5-docker-기본-운영-명령) · [6. 컨테이너 실습](#-6-컨테이너-실행-실습) | [보너스 Compose](#-보너스--docker-compose) |
+| [수행 체크리스트](#-수행-체크리스트) | [7. 커스텀 이미지](#-7-기존-dockerfile-기반-커스텀-이미지) · [8. 포트 매핑](#-8-포트-매핑-및-접속-증거) · [9. 마운트·볼륨](#-9-바인드-마운트와-docker-볼륨) | [설명](#-설명) · [용어 사전](#-용어-사전) |
+| [준비물](#-준비물) · [따라 하기](#-따라-하기) | [10. Git](#-10-git-설정-및-github-연동) · [11. 보안](#-11-보안-및-개인정보-보호) | [정리](#-정리) · [과정 연결](#-과정-연결) |
+
+## 🧭 프로젝트 개요
 내 컴퓨터에 「코드가 어디서나 똑같이 돌아가는」 개발 작업실을 직접 세팅하고, 그 과정을 명령과 출력으로 남긴 기술 문서다.
 터미널로 폴더·파일·권한을 다루고, Docker 로 컨테이너를 띄우고, 기존 `nginx:alpine` 이미지를 바탕으로 **직접 만든 웹 서버 이미지**를
 포트 매핑·바인드 마운트·볼륨까지 검증했다. 모든 로그는 이 컴퓨터에서 실제로 실행한 출력이며 `logs/` 에 원본이 있다.
 
-## 실행 환경
+## 💻 실행 환경
 
 | 항목 | 값 |
 |---|---|
@@ -17,31 +44,55 @@ AI올인원 입학연수 · 개발 입문 E1-1 (미션 185000)
 | Git | 2.56.0 |
 | 하드웨어 | x86_64, CPU 16코어, RAM 62GB |
 
+> [!NOTE]
 > 이 PC 의 사용자 계정은 `docker` 그룹이 아니어서 Docker 명령은 모두 `sudo docker …` 로 실행했다(트러블슈팅 1).
 > 다른 PC 에서는 `sudo` 없이 `docker …` 로 같은 결과가 나온다.
 
-## 수행 체크리스트
-- [x] 터미널 기본 조작 및 폴더 구성 → [2](#2-터미널-조작-로그)
-- [x] 권한 변경 실습(파일 1, 디렉터리 1) → [3](#3-권한-실습)
-- [x] Docker 설치·데몬 점검 → [4](#4-docker-설치-및-기본-점검)
-- [x] Docker 기본 운영 명령(images·ps·logs·stats) → [5](#5-docker-기본-운영-명령)
-- [x] hello-world, ubuntu 컨테이너, attach/exec 관찰 → [6](#6-컨테이너-실행-실습)
-- [x] Dockerfile 커스텀 이미지 빌드·실행 → [7](#7-기존-dockerfile-기반-커스텀-이미지)
-- [x] 포트 매핑 접속 2회(8081·8082) → [8](#8-포트-매핑-및-접속-증거)
-- [x] 바인드 마운트 반영 · 볼륨 영속성 → [9](#9-바인드-마운트와-docker-볼륨)
-- [x] Git 사용자 정보·기본 브랜치 설정 → [10](#10-git-설정-및-github-연동)
-- [ ] GitHub 로그인·저장소 연동 증거 — GitHub 에 올리는 단계에서 채운다(10절)
-- [x] 민감정보 마스킹 → [11](#11-보안-및-개인정보-보호)
-- [x] 트러블슈팅 3건 · 보너스 Compose 단일/멀티
+```mermaid
+flowchart LR
+    subgraph HOST["💻 내 컴퓨터(호스트)"]
+        B["🌐 브라우저 / curl"]
+        BS["📁 ./bind-site"]
+        subgraph DOCKER["🐳 Docker"]
+            W1["e11-web-8081<br/>nginx:alpine + 우리 페이지"]
+            W2["e11-web-8082"]
+            BM["e11-bind<br/>nginx:alpine"]
+            V1["e11-vol1 → e11-vol2<br/>ubuntu:22.04"]
+            VOL[("💾 볼륨 e11-data")]
+        end
+    end
+    B -- "localhost:8081 → :80" --> W1
+    B -- "localhost:8082 → :80" --> W2
+    B -- "localhost:8083 → :80" --> BM
+    BS -. "바인드 마운트(:ro)" .-> BM
+    VOL -. "/data" .-> V1
+```
 
-## 준비물
+## ✅ 수행 체크리스트
+
+| 상태 | 항목 | 어디 |
+|:---:|---|---|
+| ✅ | 터미널 기본 조작 및 폴더 구성 | [2](#-2-터미널-조작-로그) |
+| ✅ | 권한 변경 실습(파일 1, 디렉터리 1) | [3](#-3-권한-실습) |
+| ✅ | Docker 설치·데몬 점검 | [4](#-4-docker-설치-및-기본-점검) |
+| ✅ | Docker 기본 운영 명령(images·ps·logs·stats) | [5](#-5-docker-기본-운영-명령) |
+| ✅ | hello-world, ubuntu 컨테이너, attach/exec 관찰 | [6](#-6-컨테이너-실행-실습) |
+| ✅ | Dockerfile 커스텀 이미지 빌드·실행 | [7](#-7-기존-dockerfile-기반-커스텀-이미지) |
+| ✅ | 포트 매핑 접속 2회(8081·8082) + 브라우저 주소창 캡처 | [8](#-8-포트-매핑-및-접속-증거) |
+| ✅ | 바인드 마운트 반영 · 볼륨 영속성 | [9](#-9-바인드-마운트와-docker-볼륨) |
+| ✅ | Git 사용자 정보·기본 브랜치 설정 | [10](#-10-git-설정-및-github-연동) |
+| ⏳ | GitHub 로그인·저장소 연동 증거 — GitHub 에 올리는 단계에서 채운다 | [10](#-10-git-설정-및-github-연동) |
+| ✅ | 민감정보 마스킹 | [11](#-11-보안-및-개인정보-보호) |
+| ✅ | 트러블슈팅 3건 · 보너스 Compose 단일/멀티 | [트러블슈팅](#-트러블슈팅) · [보너스](#-보너스--docker-compose) |
+
+## 🧰 준비물
 - Linux 또는 macOS 터미널(Windows 는 WSL2). 이 문서는 Linux 에서 했다.
 - Docker Engine + Compose 플러그인(확인: `docker --version`, `docker compose version`).
 - Git(확인: `git --version`), curl, 웹 브라우저.
 - 비어 있는 호스트 포트 8081~8085(사용 중이면 다른 번호로 바꾼다 — 트러블슈팅 2).
 - 전제 지식: 없음. 명령을 위에서부터 그대로 따라 치면 된다.
 
-## 따라 하기
+## 🚶 따라 하기
 1. 저장소를 받는다: `git clone <저장소 주소> && cd E1-1`
 2. 이미지를 만든다: `docker build -t e11-web:1.0 .`
 3. 두 포트로 띄운다: `docker run -d --name e11-web-8081 -p 8081:80 e11-web:1.0` (8082 도 같은 방식)
@@ -51,7 +102,7 @@ AI올인원 입학연수 · 개발 입문 E1-1 (미션 185000)
 
 ---
 
-## 1. 제출 저장소 및 기술 문서
+## 📁 1. 제출 저장소 및 기술 문서
 - 이 README 가 기술 문서다. 명령과 출력은 코드 블록으로, 긴 원본은 `logs/` 파일로 링크했다.
 - 파일 구성
 
@@ -67,7 +118,7 @@ AI올인원 입학연수 · 개발 입문 E1-1 (미션 185000)
 └── logs/                # 단계별 실행 로그 원본(01~10)
 ```
 
-## 2. 터미널 조작 로그
+## ⌨️ 2. 터미널 조작 로그
 원본: [logs/01-terminal.log](logs/01-terminal.log) — 현재 위치·숨김 파일 포함 목록·이동·생성·복사·이름 변경·삭제·내용 확인·빈 파일.
 
 ```console
@@ -94,7 +145,7 @@ $ ls -la . notes docs
 ```
 `practice/` 폴더에 결과(`README.md`, `notes/todo.txt`, `docs/plan.txt`)가 그대로 남아 있다.
 
-## 3. 권한 실습
+## 🔐 3. 권한 실습
 원본: [logs/02-permission.log](logs/02-permission.log)
 
 ```console
@@ -120,7 +171,7 @@ drwxr-xr-x 755 docs
 | 파일 `notes/todo.txt` | `644` rw-r--r-- | `600` rw------- | 다른 사람은 읽지도 못하게(개인 메모·키 파일) → 다시 644 |
 | 디렉터리 `docs` | `755` rwxr-xr-x | `700` rwx------ | 다른 사람은 목록 보기·들어가기 불가 → 다시 755 |
 
-## 4. Docker 설치 및 기본 점검
+## 🐳 4. Docker 설치 및 기본 점검
 원본: [logs/03-docker-basic.log](logs/03-docker-basic.log)
 
 ```console
@@ -141,7 +192,7 @@ $ sudo docker info            # 발췌 — 데몬이 응답하면 Server 정보�
  ID: <데몬 ID 마스킹>
 ```
 
-## 5. Docker 기본 운영 명령
+## 📊 5. Docker 기본 운영 명령
 원본: [logs/03-docker-basic.log](logs/03-docker-basic.log), [logs/04-container.log](logs/04-container.log)
 
 ```console
@@ -169,7 +220,7 @@ $ sudo docker start e11-ticker
 ```
 `ps` 는 실행 중인 것만, `ps -a` 는 멈춘 것(`Exited`)까지 보여 준다.
 
-## 6. 컨테이너 실행 실습
+## 📦 6. 컨테이너 실행 실습
 원본: [logs/03-docker-basic.log](logs/03-docker-basic.log), [logs/04-container.log](logs/04-container.log)
 
 ```console
@@ -213,7 +264,7 @@ root   41     0  ps -ef                          # exec 는 옆에 새 프로세
 
 컨테이너의 수명은 PID 1 의 수명이다. `echo` 처럼 금방 끝나는 명령이면 컨테이너도 바로 `Exited`, `sleep infinity` 나 웹 서버처럼 계속 도는 명령이면 유지된다.
 
-## 7. 기존 Dockerfile 기반 커스텀 이미지
+## 🧱 7. 기존 Dockerfile 기반 커스텀 이미지
 원본: [logs/05-dockerfile-port.log](logs/05-dockerfile-port.log) · 방식 **(A) 웹 서버 베이스 이미지 + 정적 콘텐츠·설정 교체**
 
 - **기존 베이스**: 공식 `nginx:alpine` — 이미 잘 동작하는 웹 서버 이미지를 그대로 쓰고, 바꿀 것만 얹는다.
@@ -248,7 +299,7 @@ $ sudo docker inspect --format "{{json .Config.Labels}}" e11-web:1.0
 {"maintainer":"NGINX Docker Maintainers <docker-maint@nginx.com>","org.opencontainers.image.description":"E1-1 개발자 작업실 정적 웹 서버","org.opencontainers.image.title":"e11-web"}
 ```
 
-## 8. 포트 매핑 및 접속 증거
+## 🌐 8. 포트 매핑 및 접속 증거
 원본: [logs/05-dockerfile-port.log](logs/05-dockerfile-port.log)
 
 ```console
@@ -266,14 +317,22 @@ $ curl -s http://localhost:8082/ | grep -o "<h1>.*</h1>"
 ```
 같은 이미지 하나로 컨테이너 둘을 띄우고, 호스트 포트만 다르게(8081·8082) 연결했다. 컨테이너 안에서는 둘 다 80번이다.
 
-| 브라우저 접속 화면 — 주소창 `localhost:8081` 과 응답 |
-|---|
-| ![8081 브라우저 접속 화면](docs/screenshots/browser-8081.png) |
+<table>
+<tr>
+<th>브라우저 — 주소창 <code>localhost:8081</code> 과 응답</th>
+<th>페이지 본문 — 8081 / 8082</th>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/browser-8081.png" alt="8081 브라우저 접속 화면(주소창 포함)"></td>
+<td width="50%"><img src="docs/screenshots/page-8081-headless.png" alt="8081 페이지 본문"><br><img src="docs/screenshots/page-8082-headless.png" alt="8082 페이지 본문"></td>
+</tr>
+</table>
 
-> 실습용 새 Chromium 프로필로 연 브라우저 창 캡처다(주소창의 포트와 응답 페이지가 함께 보인다).
-> 8082 도 같은 페이지가 나온다 — 페이지 본문 캡처: [8081](docs/screenshots/page-8081-headless.png) · [8082](docs/screenshots/page-8082-headless.png).
+> [!TIP]
+> 왼쪽은 실습용 새 Chromium 프로필로 연 실제 브라우저 창 캡처다(주소창의 포트와 응답이 함께 보인다).
+> 같은 이미지라 8082 도 같은 페이지가 나온다.
 
-## 9. 바인드 마운트와 Docker 볼륨
+## 💾 9. 바인드 마운트와 Docker 볼륨
 
 ### 9-1. 바인드 마운트 — 호스트 변경이 컨테이너에 바로 반영
 원본: [logs/06-bind-mount.log](logs/06-bind-mount.log)
@@ -311,7 +370,7 @@ e11-data local /var/lib/docker/volumes/e11-data/_data
 | 데이터 위치 | 내가 고른 호스트 폴더(`./bind-site`) | Docker 가 관리하는 곳(`/var/lib/docker/volumes/…`) |
 | 쓰임 | 개발 중 소스 수정을 바로 반영 | DB 데이터처럼 컨테이너보다 오래 살아야 하는 데이터 |
 
-## 10. Git 설정 및 GitHub 연동
+## 🌱 10. Git 설정 및 GitHub 연동
 원본: [logs/08-git.log](logs/08-git.log)
 
 > 이 PC 의 실제 전역 Git 설정을 바꾸지 않으려고 실습용 전역 설정 파일(`GIT_CONFIG_GLOBAL`)을 따로 지정해 `--global` 명령을 실행했다.
@@ -342,7 +401,7 @@ main
 - [ ] `git remote add origin …` → `git push -u origin main` 로그
 - [ ] (보너스) SSH 키 등록 후 `ssh -T git@github.com` 결과
 
-## 11. 보안 및 개인정보 보호
+## 🛡️ 11. 보안 및 개인정보 보호
 - `docker info` 의 호스트명(`Name`)과 데몬 ID(`ID`)는 `<… 마스킹>` 으로 바꿨다.
 - 로그의 홈 경로는 `~` 로 줄였다.
 - 토큰·비밀번호·개인키는 이 저장소 어디에도 없다. `.env` 는 `.gitignore` 에 넣어 실수로 올라가지 않게 했다.
@@ -350,9 +409,12 @@ main
 
 ---
 
-## 트러블슈팅
+## 🔧 트러블슈팅
 
 ### 1. `docker ps` → permission denied
+> [!WARNING]
+> `permission denied while trying to connect to the docker API at unix:///var/run/docker.sock`
+
 - **문제**: `docker ps` 가 `permission denied while trying to connect to the docker API at unix:///var/run/docker.sock`.
 - **원인 가설**: Docker 데몬 소켓은 root 와 `docker` 그룹만 쓸 수 있는데 내 계정이 그 그룹이 아니다.
 - **확인**: `id -nG` → `learner wheel` (`docker` 없음).
@@ -360,12 +422,18 @@ main
   (단, docker 그룹은 사실상 root 권한이라 공용 PC 에서는 sudo 가 더 안전하다).
 
 ### 2. 8080 포트 → port is already allocated
+> [!WARNING]
+> `Bind for 127.0.0.1:8080 failed: port is already allocated`
+
 - **문제**: `docker run -p 8080:80 …` 가 `Bind for 127.0.0.1:8080 failed: port is already allocated`.
 - **원인 가설**: 호스트의 8080 을 다른 프로그램이 이미 쓰고 있다.
 - **확인**: `ss -ltn | grep ":8080 "` → `127.0.0.1:8080 LISTEN`, `docker ps` → `searxng  127.0.0.1:8080->8080/tcp`.
 - **해결/대안**: 기존 서비스를 끄지 않고 비어 있는 8081·8082 를 썼다. 실패한 컨테이너는 `docker rm` 으로 지웠다.
 
 ### 3. `timeout 3 sudo docker attach` 가 끝나지 않음
+> [!WARNING]
+> 3초만 보려던 attach 가 몇 분이 지나도 끝나지 않았다.
+
 - **문제**: attach 를 3초만 보려고 `timeout 3 sudo docker attach --sig-proxy=false …` 를 했는데 몇 분이 지나도 안 끝났다.
 - **원인 가설**: ① `timeout` 이 보낸 종료 신호(SIGTERM)가 `sudo` 너머의 `docker attach` 까지 전달되지 않았고,
   ② `--sig-proxy=false` 인 attach 는 SIGTERM 을 받아도 끊기지 않는다.
@@ -377,7 +445,7 @@ main
 `e11-ticker` 는 `bash -c` 가 PID 1 이라 SIGTERM 을 무시한다. `docker stop` 은 10초를 기다린 뒤 SIGKILL 로 끝내서
 종료 코드가 137(128+9)이 됐다. 웹 서버(nginx)처럼 신호를 처리하는 프로그램은 바로 정상 종료한다.
 
-## 보너스 — Docker Compose
+## 🎁 보너스 — Docker Compose
 원본: [logs/09-compose.log](logs/09-compose.log)
 
 **1) 단일 서비스** — `compose/compose.single.yaml`: `docker run -d -p 8084:80 -e APP_ENV=… e11-web:1.0` 을 파일로 옮겼다.
@@ -406,11 +474,20 @@ $ sudo docker compose down
 ```
 Compose 는 프로젝트마다 네트워크(`e11-multi_default`)를 만들고, 서비스 이름을 그 안의 DNS 이름으로 등록한다. 그래서 `web` 은 IP 를 몰라도 `helper` 로 찾아간다.
 
-## 정리
+```mermaid
+flowchart LR
+    U["🌐 localhost:8085"] --> WEB
+    subgraph NET["🔗 네트워크 e11-multi_default"]
+        WEB["web<br/>e11-web:1.0<br/>APP_ENV=staging"] -- "http://helper:8000" --> HELPER["helper<br/>busybox httpd"]
+    end
+    HELPER -. "./helper (읽기 전용)" .- FILE["📄 index.html"]
+```
+
+## 🧹 정리
 원본: [logs/10-cleanup.log](logs/10-cleanup.log) — 실습에서 만든 컨테이너·볼륨·이미지(hello-world, ubuntu, busybox)를 지웠다.
 브라우저 캡처 뒤 `e11-web-8081` 과 `e11-web:1.0`·`nginx:alpine` 이미지까지 지워 실습 자원은 0개다. 원래 이 PC 에서 돌던 컨테이너(searxng 등)는 건드리지 않았다.
 
-## 설명
+## 📝 설명
 
 | 주제 | 설명 |
 |---|---|
@@ -421,7 +498,7 @@ Compose 는 프로젝트마다 네트워크(`e11-multi_default`)를 만들고, �
 | Docker 볼륨 | 컨테이너 파일은 컨테이너와 함께 사라진다. 볼륨은 컨테이너 밖에 따로 보관돼 컨테이너를 지우고 새로 띄워도 데이터가 남는다(9-2). |
 | Git vs GitHub | Git 은 내 컴퓨터에서 변경 이력을 관리하는 **도구**, GitHub 는 그 저장소를 인터넷에 올려 공유·협업(PR·이슈)하는 **서비스**다. Git 만으로도 버전 관리는 되고, GitHub 는 원격 저장소가 필요할 때 쓴다. |
 
-## 용어 사전
+## 📖 용어 사전
 - **이미지**: 컨테이너를 만드는 읽기 전용 설계도(파일 시스템 + 실행 명령).
 - **컨테이너**: 이미지로 띄운 실행 중인 격리 환경. 지우면 안의 변경은 사라진다.
 - **데몬**: 뒤에서 계속 돌며 요청을 처리하는 프로그램. Docker 는 `dockerd` 가 컨테이너를 관리한다.
@@ -429,6 +506,6 @@ Compose 는 프로젝트마다 네트워크(`e11-multi_default`)를 만들고, �
 - **헬스체크**: 서비스가 정상인지 주기적으로 확인하는 검사(`HEALTHCHECK`).
 - **Compose**: 여러 컨테이너의 실행 설정을 YAML 파일 하나로 적고 한 번에 올리고 내리는 도구.
 
-## 과정 연결
+## 🔗 과정 연결
 - 입학 연수 1주차 시험(개발 환경 세팅)은 이 미션의 명령을 그대로 묻는다 — `pwd`·`mkdir`·`ls -la`·`touch`·`cat`·`cp`·`rm`·`git init`·`git add .`·`docker --version`·`docker pull nginx`·`docker images`·`docker ps -a`.
 - 여기서 만든 `e11-web` 이미지와 Compose 설정은 본과정 「클라우드와 AI API」 배포 미션의 보너스(서버 안에서 Docker 로 배포)에 다시 쓸 수 있다.
