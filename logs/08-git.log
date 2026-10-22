@@ -1,0 +1,29 @@
+$ git --version
+git version 2.56.0
+$ git config --global user.name "dicia-jhoh"
+$ git config --global user.email "dicia.jhoh@gmail.com"
+$ git config --global init.defaultBranch main
+$ git config --global core.editor "vim"
+$ git config --global --list
+user.name=dicia-jhoh
+user.email=dicia.jhoh@gmail.com
+init.defaultbranch=main
+core.editor=vim
+$ git branch --show-current
+main
+$ git config --list
+user.name=dicia-jhoh
+user.email=dicia.jhoh@gmail.com
+init.defaultbranch=main
+core.editor=vim
+core.repositoryformatversion=0
+core.filemode=true
+core.bare=false
+core.logallrefupdates=true
+user.name=dicia-jhoh
+user.email=dicia.jhoh@gmail.com
+$ git log --oneline
+b37ccba Feat: 바인드 마운트 반영·Docker 볼륨 영속성 검증 로그
+2d1d5eb Feat: nginx:alpine 기반 커스텀 이미지(e11-web:1.0)와 포트 매핑 2회
+14b8f72 Feat: Docker 설치 점검·기본 운영 명령·컨테이너 실행 실습 로그
+1330875 Feat: 터미널 기본 조작·권한 변경 실습 로그
