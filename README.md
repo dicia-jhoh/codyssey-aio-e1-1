@@ -65,8 +65,7 @@ curl --version | head -1
 
 - 🌐 웹 브라우저(크롬·엣지·사파리 아무거나).
 - 🚪 비어 있는 포트 8081~8085. 다른 프로그램이 쓰고 있으면 [트러블슈팅 2](#2-8080-포트--port-is-already-allocated)처럼 다른 번호를 쓰면 된다.
-- 📂 이 저장소 파일. GitHub 저장소 페이지의 초록색 **[Code]** → **[Download ZIP]** 으로 받아 압축을 푼다(Git 을 알면 `git clone <저장소 주소>`).
-  지금은 GitHub 에 올리기 전 초안이라, 올린 뒤 이 자리에 주소가 들어간다.
+- 📂 이 저장소 파일. [GitHub 저장소 페이지](https://github.com/dicia-jhoh/codyssey-aio-e1-1)의 초록색 **[Code]** → **[Download ZIP]** 으로 받아 압축을 푼다(Git 을 알면 `git clone https://github.com/dicia-jhoh/codyssey-aio-e1-1.git`).
 - 전제 지식: **없음.** 아래 명령을 위에서부터 그대로 복사해 붙여 넣으면 된다.
 
 > [!NOTE]
@@ -291,7 +290,7 @@ flowchart LR
 | ✅ | 포트 매핑 접속 2회(8081·8082) + 브라우저 주소창 캡처 | [8](#-8-포트-매핑-및-접속-증거) |
 | ✅ | 바인드 마운트 반영 · 볼륨 영속성 | [9](#-9-바인드-마운트와-docker-볼륨) |
 | ✅ | Git 사용자 정보·기본 브랜치 설정 | [10](#-10-git-설정-및-github-연동) |
-| ⏳ | GitHub 로그인·저장소 연동 증거 — GitHub 에 올리는 단계에서 채운다 | [10](#-10-git-설정-및-github-연동) |
+| ✅ | GitHub 인증·저장소 연동(`ssh -T` 인증 확인 → `git push -u origin main`) | [10](#-10-git-설정-및-github-연동) |
 | ✅ | 민감정보 마스킹 | [11](#️-11-보안-및-개인정보-보호) |
 | ✅ | 트러블슈팅 3건 · 보너스 Compose 단일/멀티 | [트러블슈팅](#-트러블슈팅) · [보너스](#-보너스--docker-compose) |
 
@@ -310,7 +309,7 @@ flowchart LR
 ├── compose/             # 보너스 — compose.single.yaml(단일), compose.yaml(멀티) + helper/
 ├── practice/            # 터미널 조작 실습 결과 폴더
 ├── docs/screenshots/    # 접속 화면
-└── logs/                # 단계별 실행 로그 원본(01~10)
+└── logs/                # 단계별 실행 로그 원본(01~11)
 ```
 
 ## ⌨️ 2. 터미널 조작 로그
@@ -609,10 +608,29 @@ $ git branch --show-current
 main
 ```
 
-**GitHub 연동** — 지금은 로컬 초안 단계라 원격 저장소가 없다. GitHub 에 올리는 단계에서 아래를 채운다.
-- [ ] GitHub 로그인(VS Code 또는 `gh auth login`) 화면 캡처 — 토큰·코드는 가린다
-- [ ] `git remote add origin …` → `git push -u origin main` 로그
-- [ ] (보너스) SSH 키 등록 후 `ssh -T git@github.com` 결과
+**GitHub 연동** — 원본: [logs/11-github.log](logs/11-github.log). 저장소 = https://github.com/dicia-jhoh/codyssey-aio-e1-1
+
+> 이 PC 에는 GitHub 계정이 둘이라, `~/.ssh/config` 에 `Host github-dicia-jhoh`(실제 주소 github.com + 이 계정 전용 SSH 키)를 따로 두었다.
+> 그래서 `git@github.com:` 대신 `git@github-dicia-jhoh:` 로 적었다. 계정이 하나면 `git@github.com:` 그대로 쓰면 된다.
+
+```console
+$ ssh -T git@github-dicia-jhoh
+Hi dicia-jhoh! You've successfully authenticated, but GitHub does not provide shell access.
+$ git remote add origin git@github-dicia-jhoh:dicia-jhoh/codyssey-aio-e1-1.git
+$ git remote -v
+origin	git@github-dicia-jhoh:dicia-jhoh/codyssey-aio-e1-1.git (fetch)
+origin	git@github-dicia-jhoh:dicia-jhoh/codyssey-aio-e1-1.git (push)
+$ git push -u origin main
+To github-dicia-jhoh:dicia-jhoh/codyssey-aio-e1-1.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
+$ git status -sb
+## main...origin/main
+```
+
+- ✅ GitHub 인증 — SSH 키로 로그인했다. `Hi dicia-jhoh!` 가 이 키가 그 계정에 등록돼 있다는 증거다(비밀번호·토큰은 화면에 나오지 않는다).
+- ✅ 저장소 연동 — `origin` 을 등록하고 `main` 을 올렸다. `## main...origin/main` 은 내 컴퓨터와 GitHub 가 같은 상태라는 뜻이다.
+- ✅ (보너스) SSH 키 인증 — 위 `ssh -T` 결과.
 
 ## 🛡️ 11. 보안 및 개인정보 보호
 > 🧒 기록을 남에게 보여 주기 전에 **내 컴퓨터 이름·비밀번호 같은 것을 가린** 목록이다.

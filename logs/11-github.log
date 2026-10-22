@@ -1,0 +1,12 @@
+$ ssh -T git@github-dicia-jhoh   # ~/.ssh/config 의 Host github-dicia-jhoh = github.com + dicia-jhoh 전용 키
+Hi dicia-jhoh! You've successfully authenticated, but GitHub does not provide shell access.
+$ git remote add origin git@github-dicia-jhoh:dicia-jhoh/codyssey-aio-e1-1.git
+$ git remote -v
+origin	git@github-dicia-jhoh:dicia-jhoh/codyssey-aio-e1-1.git (fetch)
+origin	git@github-dicia-jhoh:dicia-jhoh/codyssey-aio-e1-1.git (push)
+$ git push -u origin main
+To github-dicia-jhoh:dicia-jhoh/codyssey-aio-e1-1.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
+$ git status -sb
+## main...origin/main
