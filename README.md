@@ -266,12 +266,12 @@ $ curl -s http://localhost:8082/ | grep -o "<h1>.*</h1>"
 ```
 같은 이미지 하나로 컨테이너 둘을 띄우고, 호스트 포트만 다르게(8081·8082) 연결했다. 컨테이너 안에서는 둘 다 80번이다.
 
-| 접속 화면(`http://localhost:8081/`) |
+| 브라우저 접속 화면 — 주소창 `localhost:8081` 과 응답 |
 |---|
-| ![8081 접속 화면](docs/screenshots/page-8081-headless.png) |
+| ![8081 브라우저 접속 화면](docs/screenshots/browser-8081.png) |
 
-> 위 그림은 헤드리스 Chromium 으로 `http://localhost:8081/` 을 연 페이지 화면이다(주소는 캡션과 curl 로그로 확인).
-> 원문이 요구하는 **주소창(포트 포함)이 보이는 브라우저 캡처**는 GitHub 에 올리기 전에 `docs/screenshots/browser-8081.png` 로 추가한다.
+> 실습용 새 Chromium 프로필로 연 브라우저 창 캡처다(주소창의 포트와 응답 페이지가 함께 보인다).
+> 8082 도 같은 페이지가 나온다 — 페이지 본문 캡처: [8081](docs/screenshots/page-8081-headless.png) · [8082](docs/screenshots/page-8082-headless.png).
 
 ## 9. 바인드 마운트와 Docker 볼륨
 
@@ -408,7 +408,7 @@ Compose 는 프로젝트마다 네트워크(`e11-multi_default`)를 만들고, �
 
 ## 정리
 원본: [logs/10-cleanup.log](logs/10-cleanup.log) — 실습에서 만든 컨테이너·볼륨·이미지(hello-world, ubuntu, busybox)를 지웠다.
-원래 이 PC 에서 돌던 컨테이너(searxng 등)는 건드리지 않았다. `e11-web-8081` 은 주소창 캡처를 위해 남겨 두었다.
+브라우저 캡처 뒤 `e11-web-8081` 과 `e11-web:1.0`·`nginx:alpine` 이미지까지 지워 실습 자원은 0개다. 원래 이 PC 에서 돌던 컨테이너(searxng 등)는 건드리지 않았다.
 
 ## 설명
 
