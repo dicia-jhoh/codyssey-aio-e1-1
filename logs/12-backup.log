@@ -1,0 +1,28 @@
+$ sudo docker volume create e11-data
+e11-data
+$ sudo docker run --rm -v e11-data:/data ubuntu:22.04 bash -c "echo 지키고 싶은 기록 > /data/hello.txt && cat /data/hello.txt"
+Unable to find image 'ubuntu:22.04' locally
+22.04: Pulling from library/ubuntu
+0626d3cc316c: Pulling fs layer
+0626d3cc316c: Download complete
+ae52aad3a114: Download complete
+0626d3cc316c: Pull complete
+Digest: sha256:e0f80c829509ef4df9e76bd8944eb7b8ec25cbb379b112a7f9448b2c77a77c9b
+Status: Downloaded newer image for ubuntu:22.04
+지키고 싶은 기록
+$ mkdir -p backup
+$ sudo docker run --rm -v e11-data:/data:ro -v "$PWD/backup":/backup ubuntu:22.04 tar czf /backup/e11-data.tar.gz -C /data .
+$ tar tzf backup/e11-data.tar.gz
+./
+./hello.txt
+$ sudo docker volume rm e11-data                     # 사고: 볼륨을 통째로 지움
+e11-data
+$ sudo docker volume ls --filter name=e11-data
+DRIVER    VOLUME NAME
+$ sudo docker volume create e11-data
+e11-data
+$ sudo docker run --rm -v e11-data:/data -v "$PWD/backup":/backup:ro ubuntu:22.04 tar xzf /backup/e11-data.tar.gz -C /data
+$ sudo docker run --rm -v e11-data:/data ubuntu:22.04 cat /data/hello.txt   # 복구 확인
+지키고 싶은 기록
+$ sudo docker volume rm e11-data && rm -rf backup   # 실습 정리
+e11-data

@@ -288,7 +288,7 @@ flowchart LR
 | ✅ | hello-world, ubuntu 컨테이너, attach/exec 관찰 | [6](#-6-컨테이너-실행-실습) |
 | ✅ | Dockerfile 커스텀 이미지 빌드·실행 | [7](#-7-기존-dockerfile-기반-커스텀-이미지) |
 | ✅ | 포트 매핑 접속 2회(8081·8082) + 브라우저 주소창 캡처 | [8](#-8-포트-매핑-및-접속-증거) |
-| ✅ | 바인드 마운트 반영 · 볼륨 영속성 | [9](#-9-바인드-마운트와-docker-볼륨) |
+| ✅ | 바인드 마운트 반영 · 볼륨 영속성 · 볼륨 백업·복구 | [9](#-9-바인드-마운트와-docker-볼륨) |
 | ✅ | Git 사용자 정보·기본 브랜치 설정 | [10](#-10-git-설정-및-github-연동) |
 | ✅ | GitHub 인증·저장소 연동(`ssh -T` 인증 확인 → `git push -u origin main`) | [10](#-10-git-설정-및-github-연동) |
 | ✅ | 민감정보 마스킹 | [11](#️-11-보안-및-개인정보-보호) |
@@ -579,6 +579,39 @@ e11-data local /var/lib/docker/volumes/e11-data/_data
 |---|---|---|
 | 데이터 위치 | 내가 고른 호스트 폴더(`./bind-site`) | Docker 가 관리하는 곳(`/var/lib/docker/volumes/…`) |
 | 쓰임 | 개발 중 소스 수정을 바로 반영 | DB 데이터처럼 컨테이너보다 오래 살아야 하는 데이터 |
+
+### 9-3. 볼륨 백업·복구 — 볼륨까지 지워져도 되살린다
+원본: [logs/12-backup.log](logs/12-backup.log)
+
+볼륨은 컨테이너를 지워도 남는다. 하지만 `docker volume rm` 으로 볼륨을 지우면 데이터도 함께 사라진다.
+그래서 볼륨 안의 데이터를 호스트 파일(`tar.gz`)로 떠 두고, 그 파일로 되살리는 절차를 직접 해 봤다.
+```console
+$ sudo docker volume create e11-data
+$ sudo docker run --rm -v e11-data:/data ubuntu:22.04 bash -c "echo 지키고 싶은 기록 > /data/hello.txt && cat /data/hello.txt"
+지키고 싶은 기록
+$ mkdir -p backup
+$ sudo docker run --rm -v e11-data:/data:ro -v "$PWD/backup":/backup ubuntu:22.04 tar czf /backup/e11-data.tar.gz -C /data .
+$ tar tzf backup/e11-data.tar.gz
+./
+./hello.txt
+$ sudo docker volume rm e11-data                     # 사고: 볼륨을 통째로 지움
+$ sudo docker volume ls --filter name=e11-data
+DRIVER    VOLUME NAME
+$ sudo docker volume create e11-data
+$ sudo docker run --rm -v e11-data:/data -v "$PWD/backup":/backup:ro ubuntu:22.04 tar xzf /backup/e11-data.tar.gz -C /data
+$ sudo docker run --rm -v e11-data:/data ubuntu:22.04 cat /data/hello.txt   # 복구 확인
+지키고 싶은 기록
+```
+
+| 단계 | 하는 일 | 왜 이렇게 |
+|---|---|---|
+| 백업 | 잠깐 띄운 컨테이너가 볼륨을 `:ro`(읽기 전용)로 붙이고 `tar` 로 묶는다 | 백업 중에 원본이 바뀌지 않게 |
+| 보관 | `backup/e11-data.tar.gz` 를 호스트(또는 다른 디스크·저장소)에 둔다 | 볼륨과 같은 곳에만 두면 같이 잃는다 |
+| 복구 | 빈 볼륨을 새로 만들고 압축을 그 안에 푼다 | 컨테이너 설정은 그대로, 데이터만 되돌린다 |
+| 확인 | 새 컨테이너에서 파일을 읽어 본다 | 백업 파일이 있어도 풀어 보기 전엔 믿지 않는다 |
+
+`--rm` 컨테이너는 백업·복구 한 번만 하고 사라진다. 그래서 실제 서비스 컨테이너를 건드리지 않는다.
+DB 처럼 쓰는 중에 파일이 바뀌는 데이터는 서비스를 잠깐 멈추거나 DB 자체의 덤프 명령을 쓴다.
 
 ## 🌱 10. Git 설정 및 GitHub 연동
 > 🧒 따라 하기 10단계(Git 이름표)의 실제 기록이다. **Git** 은 내 컴퓨터 안의 일기장, **GitHub** 는 그 일기장을 인터넷에 올려 두는 도서관이다.
