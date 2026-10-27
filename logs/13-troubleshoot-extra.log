@@ -1,0 +1,42 @@
+### A. 포트를 이미 쓰는 프로세스 찾아 끄기
+$ sudo docker run --rm -p 127.0.0.1:18090:80 ubuntu:22.04 true   # 18090 을 누가 이미 씀
+Unable to find image 'ubuntu:22.04' locally
+22.04: Pulling from library/ubuntu
+0626d3cc316c: Pulling fs layer
+0626d3cc316c: Download complete
+ae52aad3a114: Download complete
+0626d3cc316c: Pull complete
+Digest: sha256:e0f80c829509ef4df9e76bd8944eb7b8ec25cbb379b112a7f9448b2c77a77c9b
+Status: Downloaded newer image for ubuntu:22.04
+docker: Error response from daemon: failed to set up container networking: driver failed programming external connectivity on endpoint serene_kilby (d02a18ef4d758a5f1a91a70ec4ac03189656d36d4e3cbc77bbaa6384368e105e): failed to bind host port 127.0.0.1:18090/tcp: address already in use
+
+Run 'docker run --help' for more information
+$ ss -ltnp "sport = :18090"
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess
+LISTEN 0      5          127.0.0.1:18090      0.0.0.0:*    users:(("python3",pid=3268541,fd=3))
+$ ps -o pid,comm,args -p 3268541
+    PID COMMAND         COMMAND
+3268541 python3         python3 -m http.server 18090 --bind 127.0.0.1
+$ kill 3268541                                     # 내가 띄운 프로세스인지 확인한 뒤 종료(SIGTERM)
+$ ss -ltn "sport = :18090"                       # LISTEN 줄이 없으면 비었음
+State Recv-Q Send-Q Local Address:Port Peer Address:Port
+$ sudo docker run --rm -p 127.0.0.1:18090:80 ubuntu:22.04 echo 포트 바인드 성공
+포트 바인드 성공
+
+### B. 바인드 마운트에 컨테이너가 만든 파일의 주인
+$ mkdir -p own-test
+$ sudo docker run --rm -v "$PWD/own-test":/out ubuntu:22.04 bash -c "echo 컨테이너가 씀 > /out/by-root.txt"
+$ ls -l own-test
+total 4
+-rw-r--r-- 1 root root 20 10월 27일  18:35 by-root.txt
+$ echo 내가 덧붙임 >> own-test/by-root.txt
+bash: line 1: own-test/by-root.txt: Permission denied
+$ sudo docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/own-test":/out ubuntu:22.04 bash -c "echo 내 계정으로 씀 > /out/by-me.txt"
+$ ls -l own-test
+total 8
+-rw-r--r-- 1 learner learner 21 10월 27일  18:35 by-me.txt
+-rw-r--r-- 1 root     root     20 10월 27일  18:35 by-root.txt
+$ echo 내가 덧붙임 >> own-test/by-me.txt && cat own-test/by-me.txt
+내 계정으로 씀
+내가 덧붙임
+$ sudo rm -rf own-test                          # 실습 정리(root 파일이 있어 sudo)

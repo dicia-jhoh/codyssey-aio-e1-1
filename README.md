@@ -369,6 +369,20 @@ drwxr-xr-x 755 docs
 | 파일 `notes/todo.txt` | `644` rw-r--r-- | `600` rw------- | 다른 사람은 읽지도 못하게(개인 메모·키 파일) → 다시 644 |
 | 디렉터리 `docs` | `755` rwxr-xr-x | `700` rwx------ | 다른 사람은 목록 보기·들어가기 불가 → 다시 755 |
 
+**숫자 한눈에 — 자주 쓰는 네 가지.** 세 자리는 차례로 소유자·그룹·기타이고, 각 자리는 읽기 4 + 쓰기 2 + 실행 1 의 합이다.
+
+| 숫자 | 글자 | 소유자 / 그룹 / 기타 | 이럴 때 쓴다 |
+|---|---|---|---|
+| `600` | `rw-------` | 읽기·쓰기 / 없음 / 없음 | 비밀 파일 — SSH 키, `.env`, 개인 메모 |
+| `644` | `rw-r--r--` | 읽기·쓰기 / 읽기 / 읽기 | 일반 파일 — README, 소스 코드, 웹 페이지 |
+| `700` | `rwx------` | 전부 / 없음 / 없음 | 나만 들어가는 폴더 — `~/.ssh` |
+| `755` | `rwxr-xr-x` | 전부 / 읽기·들어가기 / 읽기·들어가기 | 공개 폴더, 실행할 스크립트 |
+
+**왜 바꿔 봤나(보안).** 기본값 644 는 같은 컴퓨터의 다른 계정도 파일을 읽을 수 있다. 비밀번호·토큰이 든 파일을 644 로 두면
+그 계정이 읽어 갈 수 있다. 그래서 「남에게 보일 필요가 없는 것은 600·700」 으로 좁히는 습관을 실습했다.
+반대로 웹 서버가 읽어야 하는 `bind-site/` 같은 파일을 600 으로 막으면, 컨테이너 안에서 다른 계정으로 도는 서버가 못 읽어 403 이 날 수 있다.
+그래서 공개 파일은 644·755 로 둔다.
+
 ## 🐳 4. Docker 설치 및 기본 점검
 > 🧒 「Docker 가 설치돼 있고 깨어 있나?」를 확인한 기록이다. `docker info` 가 대답하면 깨어 있는 것이다.
 
@@ -613,6 +627,18 @@ $ sudo docker run --rm -v e11-data:/data ubuntu:22.04 cat /data/hello.txt   # �
 `--rm` 컨테이너는 백업·복구 한 번만 하고 사라진다. 그래서 실제 서비스 컨테이너를 건드리지 않는다.
 DB 처럼 쓰는 중에 파일이 바뀌는 데이터는 서비스를 잠깐 멈추거나 DB 자체의 덤프 명령을 쓴다.
 
+**어느 쪽 경로를 쓸까 — 선택 기준**
+
+| 데이터 | 고를 것 | 이유 |
+|---|---|---|
+| 내가 고치는 소스·웹 페이지(`bind-site/`) | 바인드 마운트 `./폴더:/컨테이너경로` | 호스트에서 편집하면 바로 반영된다 |
+| 컨테이너가 쌓는 DB·업로드 파일 | 볼륨 `이름:/컨테이너경로` | 권한·경로를 Docker 가 맞춰 주고, 백업(9-3)도 같은 방법으로 된다 |
+| 잠깐 쓰고 버릴 임시 파일 | 마운트 없이 컨테이너 안 | 컨테이너를 지우면 같이 지워져 깔끔하다 |
+| 설정 파일 하나 | 바인드 마운트 + `:ro` | 컨테이너가 실수로 고치지 못하게 읽기 전용으로 |
+
+컨테이너 쪽 경로는 그 이미지가 데이터를 읽는 곳에 맞춘다(nginx 는 `/usr/share/nginx/html`). 호스트 쪽 경로는
+`$PWD/…` 처럼 절대 경로로 적는다. `own-test:/out` 처럼 `/`·`./` 없이 이름만 쓰면 Docker 는 폴더가 아니라 볼륨 이름으로 알아듣는다.
+
 ## 🌱 10. Git 설정 및 GitHub 연동
 > 🧒 따라 하기 10단계(Git 이름표)의 실제 기록이다. **Git** 은 내 컴퓨터 안의 일기장, **GitHub** 는 그 일기장을 인터넷에 올려 두는 도서관이다.
 
@@ -698,6 +724,26 @@ $ git status -sb
 - **확인**: `ss -ltn | grep ":8080 "` → `127.0.0.1:8080 LISTEN`, `docker ps` → `searxng  127.0.0.1:8080->8080/tcp`.
 - **해결/대안**: 기존 서비스를 끄지 않고 비어 있는 8081·8082 를 썼다. 실패한 컨테이너는 `docker rm` 으로 지웠다.
 
+**포트를 비워야 할 때 — 직접 해 본 순서.** 원본: [logs/13-troubleshoot-extra.log](logs/13-troubleshoot-extra.log)
+8080 의 searxng 는 다른 서비스라 끄지 않았다. 대신 내가 띄운 시험 서버(18090)로 「찾기 → 확인 → 끄기 → 재확인」을 해 봤다.
+```console
+$ sudo docker run --rm -p 127.0.0.1:18090:80 ubuntu:22.04 true   # 18090 을 누가 이미 씀
+docker: Error response from daemon: … failed to bind host port 127.0.0.1:18090/tcp: address already in use
+$ ss -ltnp "sport = :18090"
+LISTEN 0      5          127.0.0.1:18090      0.0.0.0:*    users:(("python3",pid=3268541,fd=3))
+$ ps -o pid,comm,args -p 3268541
+3268541 python3         python3 -m http.server 18090 --bind 127.0.0.1
+$ kill 3268541                                     # 내가 띄운 프로세스인지 확인한 뒤 종료(SIGTERM)
+$ ss -ltn "sport = :18090"                       # LISTEN 줄이 없으면 비었음
+State Recv-Q Send-Q Local Address:Port Peer Address:Port
+$ sudo docker run --rm -p 127.0.0.1:18090:80 ubuntu:22.04 echo 포트 바인드 성공
+포트 바인드 성공
+```
+> [!CAUTION]
+> - `ss -p` 로 **누구의 프로그램인지 먼저 본다.** 남의 서비스(DB·검색 서버 등)를 끄면 그 서비스가 멈춘다. 그럴 땐 내 쪽 포트를 바꾼다.
+> - 끄는 순서: `kill PID`(정리할 시간을 준다) → 그래도 남으면 `kill -9 PID`(즉시 강제, 저장 안 된 데이터가 날아갈 수 있다).
+> - 컨테이너가 잡고 있으면 `docker ps` 로 이름을 찾아 `docker stop 이름`, systemd 서비스면 `systemctl stop 이름` 으로 끈다(kill 하면 다시 살아난다).
+
 ### 3. `timeout 3 sudo docker attach` 가 끝나지 않음
 > [!WARNING]
 > 3초만 보려던 attach 가 몇 분이 지나도 끝나지 않았다.
@@ -708,6 +754,29 @@ $ git status -sb
 - **확인**: `pgrep -a -f "docker attach"` 로 attach 프로세스가 살아 있는 것을 봤다. `sudo timeout 3 …`(timeout 을 sudo 안으로)로 바꿔도 계속 살아 있었다.
 - **해결**: `sudo timeout -s KILL 3 docker attach …` — 3초 뒤 attach 클라이언트만 SIGKILL 로 끊었다. 컨테이너는 그대로 `Up`.
   사람이 터미널에서 할 때는 Ctrl+P, Ctrl+Q 로 분리하면 된다.
+
+### 4. 바인드 마운트에 컨테이너가 만든 파일을 고칠 수 없음
+원본: [logs/13-troubleshoot-extra.log](logs/13-troubleshoot-extra.log)
+
+- **문제**: 컨테이너가 바인드 마운트 폴더에 쓴 파일을 호스트에서 고치려 하면 `Permission denied`.
+- **원인**: 컨테이너 안 프로그램은 기본으로 root 로 돈다. 그래서 만든 파일의 주인도 호스트에서 root 다.
+- **확인 → 해결**:
+```console
+$ sudo docker run --rm -v "$PWD/own-test":/out ubuntu:22.04 bash -c "echo 컨테이너가 씀 > /out/by-root.txt"
+$ ls -l own-test
+-rw-r--r-- 1 root root 20 10월 27일  18:35 by-root.txt
+$ echo 내가 덧붙임 >> own-test/by-root.txt
+bash: line 1: own-test/by-root.txt: Permission denied
+$ sudo docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/own-test":/out ubuntu:22.04 bash -c "echo 내 계정으로 씀 > /out/by-me.txt"
+$ ls -l own-test
+-rw-r--r-- 1 learner learner 21 10월 27일  18:35 by-me.txt
+-rw-r--r-- 1 root     root     20 10월 27일  18:35 by-root.txt
+$ echo 내가 덧붙임 >> own-test/by-me.txt && cat own-test/by-me.txt
+내 계정으로 씀
+내가 덧붙임
+```
+- **정리**: `--user "$(id -u):$(id -g)"` 로 내 계정 번호를 넘기면 파일 주인이 나로 맞춰진다. 이미 생긴 root 파일은
+  `sudo chown -R $(id -u):$(id -g) 폴더` 로 주인을 되돌린다. 볼륨은 Docker 가 관리하는 곳이라 이 문제가 드물다.
 
 ### 참고 — `docker stop` 후 Exited (137)
 `e11-ticker` 는 `bash -c` 가 PID 1 이라 SIGTERM 을 무시한다. `docker stop` 은 10초를 기다린 뒤 SIGKILL 로 끝내서
@@ -784,6 +853,7 @@ flowchart LR
 - **Dockerfile**: 이미지를 어떻게 만들지 적은 레시피 메모(`FROM` 무엇을 바탕으로, `COPY` 무엇을 얹어서).
 - **데몬**: 뒤에서 조용히 계속 도는 일꾼 프로그램. Docker 는 `dockerd` 가 도시락들을 관리한다.
 - **포트 / 포트 매핑**: 프로그램이 손님을 받는 현관 번호 / 내 컴퓨터 현관과 컨테이너 현관을 이어 주는 것(`-p 8081:80`).
+- **네트워크 네임스페이스**: 컨테이너마다 따로 받는 「자기만의 네트워크 칸막이」. 그래서 컨테이너 안 80번 문은 내 컴퓨터 80번 문과 별개이고, `-p` 로 이어 줘야 밖에서 들어온다.
 - **localhost**: 「바로 이 컴퓨터」를 가리키는 주소. `http://localhost:8081` = 내 컴퓨터 8081번 문.
 - **curl**: 터미널에서 웹 페이지를 받아 글자로 보여 주는 도구. 브라우저의 글자판이다.
 - **바인드 마운트**: 내 컴퓨터 폴더를 컨테이너 안에 창문처럼 연결하는 것. 바깥에서 고치면 안에서도 바로 바뀐다.
